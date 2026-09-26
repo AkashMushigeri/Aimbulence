@@ -409,5 +409,87 @@ def seed_baseline_if_empty(db: Session):
         timestamp=datetime.now(timezone.utc),
     )
     db.add(initial_audit)
-
     db.commit()
+
+
+def reset_demo_database(db: Session):
+    """Safely reset synthetic database and operational entities back to initial baseline.
+    
+    DEMO-ONLY: Clears execution records, active incidents, and tasks, restoring
+    synthetic hospital capacity and resource allocations to deterministic state.
+    """
+    # 1. Clear runbook executions, tasks, incidents, and audit
+    db.query(RunbookStepExecutionRecord).delete()
+    db.query(RunbookExecutionRecord).delete()
+    db.query(OperationalTaskRecord).delete()
+    db.query(IncidentRecord).delete()
+    db.query(AuditEventRecord).delete()
+
+    # 2. Reset operating rooms
+    ors = db.query(OperatingRoomRecord).all()
+    for room in ors:
+        if room.room_number in ("OR-1", "OR-2"):
+            room.status = "OPEN"
+            room.scheduled_procedure = None
+            room.is_emergency_cleared = True
+        elif room.room_number == "OR-3":
+            room.status = "IN_USE"
+            room.scheduled_procedure = "Elective Arthroscopic Knee Debridement"
+            room.is_emergency_cleared = False
+        elif room.room_number == "OR-4":
+            room.status = "IN_USE"
+            room.scheduled_procedure = "Elective Inguinal Hernia Repair"
+            room.is_emergency_cleared = False
+        elif room.room_number == "OR-5":
+            room.status = "IN_USE"
+            room.scheduled_procedure = "Elective Cholecystectomy"
+            room.is_emergency_cleared = False
+
+    # 3. Reset beds
+    beds = db.query(BedRecord).all()
+    for bed in beds:
+        bed.is_reserved = False
+        if bed.bed_code.startswith("ED-"):
+            num = int(bed.bed_code.replace("ED-", ""))
+            bed.is_occupied = num > 12
+        elif bed.bed_code.startswith("ICU-"):
+            num = int(bed.bed_code.replace("ICU-", ""))
+            bed.is_occupied = num > 4
+
+    # 4. Reset ambulances
+    ambs = db.query(AmbulanceRecord).all()
+    for amb in ambs:
+        amb.status = "AVAILABLE"
+        amb.crew_assigned = True
+
+    # 5. Reset blood inventory
+    blood_map = {"O_NEG": 18, "O_POS": 6, "A_POS": 4, "B_POS": 2}
+    for b in db.query(BloodInventoryRecord).all():
+        if b.blood_type in blood_map:
+            b.units_available = blood_map[b.blood_type]
+
+    # 6. Reset hospital operational code
+    hospitals = db.query(HospitalRecord).all()
+    for h in hospitals:
+        h.operational_code = "NORMAL"
+        h.last_updated = datetime.now(timezone.utc)
+
+    # 7. Record demo reset audit event
+    reset_audit = AuditEventRecord(
+        id=str(uuid.uuid4()),
+        event_type="DEMO_ENVIRONMENT_RESET",
+        action_name="RESET_DEMO_BASELINE",
+        tier="GREEN",
+        details_json=json.dumps({
+            "message": "Demo environment reset to known synthetic baseline.",
+            "operational_code": "NORMAL",
+            "available_ed_beds": 12,
+            "open_ors": 2,
+            "or_3_status": "IN_USE",
+        }),
+        performed_by="DEMO_OPERATOR",
+        timestamp=datetime.now(timezone.utc),
+    )
+    db.add(reset_audit)
+    db.commit()
+
