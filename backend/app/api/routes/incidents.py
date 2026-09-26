@@ -12,6 +12,15 @@ from backend.app.services.database import get_db, IncidentRecord, AuditEventReco
 router = APIRouter(prefix="/incidents", tags=["Incidents"])
 
 
+def _parse_incident_status(raw: str) -> IncidentStatus:
+    try:
+        return IncidentStatus(raw)
+    except ValueError:
+        if raw == "ACTIVE":
+            return IncidentStatus.MOBILIZING
+        return IncidentStatus.REPORTED
+
+
 @router.post("", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED, summary="Report an emergency mass-casualty incident")
 def create_incident(payload: IncidentCreate, db: Session = Depends(get_db)):
     """Receives and validates incoming incident reports, persists to database, and writes an audit log."""
@@ -65,7 +74,7 @@ def create_incident(payload: IncidentCreate, db: Session = Depends(get_db)):
         location=record.location,
         eta_minutes=record.eta_minutes,
         description=record.description,
-        status=IncidentStatus(record.status),
+        status=_parse_incident_status(record.status),
         created_at=record.created_at,
         updated_at=record.updated_at,
     )
@@ -85,7 +94,7 @@ def list_incidents(db: Session = Depends(get_db)):
             location=r.location,
             eta_minutes=r.eta_minutes,
             description=r.description,
-            status=IncidentStatus(r.status),
+            status=_parse_incident_status(r.status),
             created_at=r.created_at,
             updated_at=r.updated_at,
         )

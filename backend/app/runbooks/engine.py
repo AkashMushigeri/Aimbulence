@@ -402,7 +402,7 @@ class RunbookEngine:
                         location="Highway 101 Northbound Mile 42",
                         eta_minutes=12,
                         description="Major multi-vehicle accident with acute trauma casualties incoming.",
-                        status="ACTIVE",
+                        status="MOBILIZING",
                         created_at=now,
                         updated_at=now,
                     )
