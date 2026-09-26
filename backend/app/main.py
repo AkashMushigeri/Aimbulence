@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
-from backend.app.api.routes import health, hospital, incidents
+from backend.app.api.routes import approval, health, hospital, incidents
 from backend.app.services.database import init_db
 
 
@@ -53,6 +53,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(health.router, prefix="/api")
 app.include_router(hospital.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
+app.include_router(approval.router, prefix="/api")
+
 
 
 @app.get("/", summary="Root index")
