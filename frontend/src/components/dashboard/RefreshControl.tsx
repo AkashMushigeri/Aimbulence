@@ -1,11 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 export function RefreshControl({ lastRefreshed }: { lastRefreshed?: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [formattedTime, setFormattedTime] = useState<string>("");
+
+  useEffect(() => {
+    if (lastRefreshed) {
+      setFormattedTime(new Date(lastRefreshed).toLocaleTimeString());
+    }
+  }, [lastRefreshed]);
 
   const handleRefresh = () => {
     startTransition(() => {
@@ -18,9 +25,10 @@ export function RefreshControl({ lastRefreshed }: { lastRefreshed?: string }) {
       {lastRefreshed ? (
         <span
           data-testid="last-refresh-time"
+          suppressHydrationWarning
           className="hidden font-mono text-xs text-slate-400 sm:inline-block"
         >
-          Refreshed: {new Date(lastRefreshed).toLocaleTimeString()}
+          {formattedTime ? `Refreshed: ${formattedTime}` : null}
         </span>
       ) : null}
       <button
