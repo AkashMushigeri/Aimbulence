@@ -37,126 +37,127 @@ export function ApprovalCheckpointModal({
       }
     };
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
     }
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSubmitDecision = async (
-    decision: "APPROVE" | "REJECT",
-    operatorId: string,
-    notes?: string,
-  ) => {
+  const handleSubmitDecision = async (payload: DecideRequestWire) => {
     setIsSubmitting(true);
     setErrorMessage(null);
     setLifecycleState("SUBMITTING");
-    setStatusMessage(`Transmitting ${decision} decision...`);
-
-    const payload: DecideRequestWire = {
-      checkpoint_id: proposal.checkpointId || "CHK-MCI-OR3",
-      decision,
-      decision_by: operatorId,
-      reason: notes,
-      execute_if_approved: true,
-    };
+    setStatusMessage("Transmitting decision to backend TrueForge checkpoint...");
 
     try {
-      const response = await submitApprovalDecisionAction(payload);
-      if (!response.ok || !response.result) {
-        setErrorMessage(response.message || "Failed to submit decision to TrueForge.");
-        setLifecycleState("PAUSED_WAITING");
-        setIsSubmitting(false);
-        return;
+      const actionRes = await submitApprovalDecisionAction(payload);
+      if (!actionRes.ok || !actionRes.result) {
+        throw new Error(actionRes.message || "Approval decision failed on server.");
       }
 
-      setResolvedResult(response.result);
+      const result = actionRes.result;
+      setResolvedResult(result);
 
-      if (decision === "APPROVE") {
-        setLifecycleState("EXECUTED");
+      if (result.checkpoint.state === "REJECTED") {
+        setLifecycleState("CONFIRMED_REJECTED");
         setStatusMessage(
-          response.result.execution
-            ? `Action authorized. Resource ${response.result.execution.resource} mutated & verified.`
-            : "Action authorized and executed successfully.",
+          `Decision recorded by ${payload.decision_by}. Preemption was REJECTED. SQLite database remained unmodified. Runbook safely blocked.`,
         );
       } else {
-        setLifecycleState("REJECTED");
-        setStatusMessage("Action rejected by operator. Execution halted safely without mutation.");
+        const isVerified = Boolean(
+          result.execution?.verification &&
+            (result.execution.verification as { verified?: boolean }).verified,
+        );
+        setLifecycleState(isVerified ? "VERIFIED_EXECUTED" : "CONFIRMED_APPROVED");
+        setStatusMessage(
+          `Consequential mutation authorized by ${payload.decision_by}. State mutated and independently verified in SQLite.`,
+        );
       }
 
       if (onDecisionSuccess) {
-        onDecisionSuccess(response.result);
+        onDecisionSuccess(result);
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Unexpected error during submission.");
-      setLifecycleState("PAUSED_WAITING");
+      const msg = err instanceof Error ? err.message : "Failed to record approval decision.";
+      setErrorMessage(msg);
+      setLifecycleState("ERROR");
+      setStatusMessage("Submission failed. The agent remains paused awaiting human authorization.");
+      throw err;
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const isResolved =
+    lifecycleState === "CONFIRMED_APPROVED" ||
+    lifecycleState === "CONFIRMED_REJECTED" ||
+    lifecycleState === "VERIFIED_EXECUTED";
+
   return (
     <div
-      data-testid="approval-checkpoint-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="checkpoint-modal-title"
+      aria-labelledby="approval-checkpoint-title"
+      data-testid="approval-checkpoint-modal"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-3xl rounded-xl border border-rose-500/50 bg-slate-900 shadow-2xl shadow-rose-950/40">
-        {/* Header Banner */}
-        <div className="flex items-center justify-between border-b border-rose-500/30 bg-rose-950/30 px-6 py-4">
-          <div className="flex items-center space-x-3">
+      <div className="relative my-8 w-full max-w-4xl rounded-xl border border-red-500/60 bg-surface-raised p-6 shadow-2xl shadow-red-950/50">
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-surface-border pb-4">
+          <div>
             <span
               data-testid="trueforge-shield-badge"
-              className="inline-flex items-center rounded bg-rose-500/20 px-2.5 py-1 text-xs font-mono font-bold tracking-wider text-rose-400 border border-rose-500/40 uppercase"
+              className="font-mono text-xs font-bold uppercase tracking-wider text-red-400"
             >
-              TRUEFORGE SAFETY CHECKPOINT
+              AIMBULENCE · Consequential Action Checkpoint
             </span>
-            <span className="text-xs font-mono text-slate-400">
+            <h2
+              id="approval-checkpoint-title"
+              className="mt-1 font-mono text-xl font-extrabold tracking-wide text-slate-100"
+            >
+              HUMAN-IN-THE-LOOP AUTHORIZATION GATE
+            </h2>
+            <div className="mt-1 text-xs font-mono text-slate-400">
               GATE ID: {proposal.checkpointId || "CHK-MCI-OR3"}
-            </span>
+            </div>
           </div>
+
           <button
             type="button"
             data-testid="modal-close-btn"
             onClick={onClose}
             disabled={isSubmitting}
-            className="text-slate-400 hover:text-white transition-colors focus:outline-none"
-            aria-label="Close modal"
+            aria-label="Close approval checkpoint modal"
+            className="rounded p-1.5 text-slate-400 hover:bg-surface hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
           >
-            ✕
+            <span aria-hidden="true" className="text-xl leading-none">
+              &times;
+            </span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="max-h-[80vh] overflow-y-auto p-6 space-y-6">
-          {/* Status Alert */}
+        <div className="mt-5 space-y-5">
+          {/* Status Banner */}
           <ApprovalStatus state={lifecycleState} message={statusMessage} />
 
-          {/* Proposal Deep-Dive */}
+          {/* Proposal Summary & Impact Briefing */}
           <ApprovalProposalView proposal={proposal} />
-
-          {/* Impact & Trade-Off Briefing */}
           <ImpactBriefing proposal={proposal} />
 
-          {/* Post-Decision Result Banner */}
-          {resolvedResult ? (
+          {/* Resolved State Display */}
+          {isResolved && resolvedResult ? (
             <div
-              data-testid="decision-outcome-card"
-              className="rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3 font-mono text-xs"
+              data-testid="resolved-execution-details"
+              className="space-y-4 rounded-lg border border-surface-border bg-surface/60 p-4"
             >
-              <h4 className="font-bold text-slate-200 uppercase tracking-wider">
-                TrueForge Execution Result
+              <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
+                Backend Checkpoint Resolution & Execution Result
               </h4>
-              <div className="grid grid-cols-2 gap-2 text-slate-400">
+              <div className="grid gap-2 text-xs font-mono text-slate-300 sm:grid-cols-2">
                 <div>
                   <span className="text-slate-500">Status:</span>{" "}
                   <strong className="text-white">{resolvedResult.status}</strong>

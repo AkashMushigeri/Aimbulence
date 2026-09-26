@@ -15,6 +15,7 @@ import type {
   DepartmentStatusWire,
   HospitalStatusWire,
   IncidentWire,
+  ResourceStatusWire,
   RunbookExecutionStateWire,
   RunbookStepResultWire,
 } from "@/types/api/contracts";
@@ -268,7 +269,6 @@ export function toAgentExecutionState(
   };
 }
 
->>>>>>> member-2
 export function formatStateSummary(state: Readonly<Record<string, unknown>> | undefined): string {
   if (!state || Object.keys(state).length === 0) {
     return "NOT PROVIDED BY BACKEND";
@@ -342,4 +342,5 @@ export function toRunbookExecution(
     activeCheckpoint: wire.checkpoint_id ?? null,
     gateState: isAwaiting ? "AWAITING_OPERATOR" : "NOT_BLOCKED",
     startedAt: wire.started_at,
+  };
 }
