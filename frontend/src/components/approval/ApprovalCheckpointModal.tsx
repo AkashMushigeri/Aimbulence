@@ -102,21 +102,19 @@ export function ApprovalCheckpointModal({
       aria-modal="true"
       aria-labelledby="approval-checkpoint-title"
       data-testid="approval-checkpoint-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-stone-900/60 p-4 backdrop-blur-sm"
     >
-      <div className="relative my-8 w-full max-w-4xl rounded-xl border border-red-500/60 bg-surface-raised p-6 shadow-2xl shadow-red-950/50">
+      <div className="relative my-8 w-full max-w-4xl rounded-3xl border border-red-300 bg-[#fffdf9] p-6 sm:p-8 shadow-2xl shadow-stone-950/20">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-surface-border pb-4">
+        <div className="flex items-start justify-between border-b border-[#ece5d8] pb-4">
           <div>
-            <span
-              data-testid="trueforge-shield-badge"
-              className="font-mono text-xs font-bold uppercase tracking-wider text-red-400"
-            >
+            <div className="inline-flex items-center gap-2 rounded-full border border-red-300 bg-red-100 px-3 py-1 font-mono text-xs font-black uppercase tracking-wider text-red-900 shadow-xs">
+              <span className="h-2 w-2 rounded-full bg-red-600 animate-ping" />
               AIMBULENCE · Consequential Action Checkpoint
-            </span>
+            </div>
             <h2
               id="approval-checkpoint-title"
-              className="mt-1 font-mono text-xl font-extrabold tracking-wide text-slate-100"
+              className="mt-2.5 font-mono text-xl sm:text-2xl font-black tracking-wide text-stone-900"
             >
               HUMAN-IN-THE-LOOP AUTHORIZATION GATE
             </h2>
@@ -131,9 +129,9 @@ export function ApprovalCheckpointModal({
             onClick={onClose}
             disabled={isSubmitting}
             aria-label="Close approval checkpoint modal"
-            className="rounded p-1.5 text-slate-400 hover:bg-surface hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
+            className="rounded-xl p-2 text-stone-500 hover:bg-[#ede7dc] hover:text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:opacity-50"
           >
-            <span aria-hidden="true" className="text-xl leading-none">
+            <span aria-hidden="true" className="text-2xl leading-none font-bold">
               &times;
             </span>
           </button>
@@ -152,23 +150,23 @@ export function ApprovalCheckpointModal({
           {isResolved && resolvedResult ? (
             <div
               data-testid="resolved-execution-details"
-              className="space-y-4 rounded-lg border border-surface-border bg-surface/60 p-4"
+              className="space-y-4 rounded-2xl border border-[#e5dfd2] bg-[#fbf9f4] p-5 sm:p-6 shadow-sm"
             >
-              <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
+              <h4 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700">
                 Backend Checkpoint Resolution & Execution Result
               </h4>
-              <div className="grid gap-2 text-xs font-mono text-slate-300 sm:grid-cols-2">
-                <div>
-                  <span className="text-slate-500">Status:</span>{" "}
-                  <strong className="text-white">{resolvedResult.status}</strong>
+              <div className="grid gap-3 text-xs sm:text-[13px] font-mono text-stone-800 sm:grid-cols-2">
+                <div className="rounded-xl border border-[#e5dfd2] bg-white p-3 shadow-xs">
+                  <span className="text-stone-600">Status:</span>{" "}
+                  <strong className="text-stone-900 font-bold">{resolvedResult.status}</strong>
                 </div>
-                <div>
-                  <span className="text-slate-500">Checkpoint State:</span>{" "}
+                <div className="rounded-xl border border-[#e5dfd2] bg-white p-3 shadow-xs">
+                  <span className="text-stone-600">Checkpoint State:</span>{" "}
                   <strong
                     className={
                       resolvedResult.checkpoint.state === "REJECTED"
-                        ? "text-rose-400"
-                        : "text-emerald-400"
+                        ? "text-rose-700 font-extrabold"
+                        : "text-emerald-700 font-extrabold"
                     }
                   >
                     {resolvedResult.checkpoint.state}
@@ -176,15 +174,15 @@ export function ApprovalCheckpointModal({
                 </div>
                 {resolvedResult.execution ? (
                   <>
-                    <div>
-                      <span className="text-slate-500">Resource Mutated:</span>{" "}
-                      <strong className="text-amber-300">
+                    <div className="rounded-xl border border-[#e5dfd2] bg-white p-3 shadow-xs">
+                      <span className="text-stone-600">Resource Mutated:</span>{" "}
+                      <strong className="text-amber-800 font-bold">
                         {resolvedResult.execution.resource}
                       </strong>
                     </div>
-                    <div>
-                      <span className="text-slate-500">Verification:</span>{" "}
-                      <strong className="text-emerald-300">
+                    <div className="rounded-xl border border-[#e5dfd2] bg-white p-3 shadow-xs">
+                      <span className="text-stone-600">Verification:</span>{" "}
+                      <strong className="text-emerald-800 font-bold">
                         {resolvedResult.execution.verification ? "CONFIRMED ON DISK" : "PENDING"}
                       </strong>
                     </div>
@@ -195,12 +193,12 @@ export function ApprovalCheckpointModal({
               {resolvedResult.checkpoint.state === "REJECTED" && (
                 <div
                   data-testid="rejection-safety-notice"
-                  className="rounded-lg border border-rose-500/60 bg-rose-950/30 p-3 text-xs text-rose-200"
+                  className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-xs sm:text-[13px] text-rose-900 shadow-xs"
                 >
-                  <p className="font-mono font-bold text-rose-300 uppercase">
+                  <p className="font-mono font-bold text-rose-800 uppercase tracking-wider">
                     Safety Boundary Maintained
                   </p>
-                  <p className="mt-1 text-slate-300">
+                  <p className="mt-1 text-stone-700 leading-relaxed font-medium">
                     Consequential action was explicitly rejected. No tool calls were executed against SQLite, and no operational resources were altered.
                   </p>
                 </div>
@@ -221,7 +219,7 @@ export function ApprovalCheckpointModal({
                   type="button"
                   data-testid="resolved-close-btn"
                   onClick={onClose}
-                  className="rounded bg-sky-600 px-4 py-2 font-mono text-xs font-bold text-white hover:bg-sky-500 focus:outline-none"
+                  className="rounded-xl bg-stone-900 px-5 py-2.5 font-mono text-xs sm:text-sm font-bold text-white hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm transition-all"
                 >
                   RETURN TO DASHBOARD
                 </button>

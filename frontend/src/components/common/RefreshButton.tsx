@@ -22,7 +22,7 @@ export function RefreshButton({ target }: { target?: string }) {
       data-testid={target ? `refresh-${target}` : "refresh"}
       disabled={pending}
       onClick={() => startTransition(() => router.refresh())}
-      className="focus-ring rounded border border-surface-border bg-surface px-3 py-1 font-mono text-xs uppercase tracking-wide text-slate-200 hover:border-sky-500/60 disabled:opacity-50"
+      className="focus-ring rounded-lg border border-[#d8d0c0] bg-[#fffdf9] px-3.5 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-stone-800 shadow-sm transition-all hover:border-stone-400 hover:bg-[#f5efe3] disabled:opacity-50"
     >
       {pending ? "Refreshing…" : "Retry"}
     </button>
@@ -34,12 +34,12 @@ export function ErrorNotice({ error, title = "Backend unavailable" }: { error: u
   return (
     <div
       data-testid="error-notice"
-      className="rounded border border-red-500/40 bg-red-500/10 px-4 py-3"
+      className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-3 shadow-sm"
       role="alert"
     >
-      <p className="text-sm font-medium text-red-200">{title}</p>
-      <p className="mt-1 text-sm text-red-200/80">{describeError(error)}</p>
-      <p className="mt-2 text-xs text-red-200/60">
+      <p className="text-sm sm:text-base font-bold text-red-950">{title}</p>
+      <p className="mt-1 text-xs sm:text-sm font-medium text-red-900">{describeError(error)}</p>
+      <p className="mt-2 text-xs sm:text-[13px] text-red-800/90">
         No figures are shown for this section. Operational data is never fabricated or carried over
         from a previous load.
       </p>

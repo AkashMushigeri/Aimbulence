@@ -4,7 +4,7 @@ export function LoadingState({ label }: { label: string }) {
     <p
       data-testid="loading-state"
       aria-busy="true"
-      className="rounded border border-dashed border-surface-border px-4 py-4 text-center font-mono text-xs uppercase tracking-wide text-sky-300"
+      className="rounded-xl border border-dashed border-[#d8d0c0] bg-[#fbf9f4] px-4 py-4 text-center font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-sky-800"
     >
       Loading {label}…
     </p>

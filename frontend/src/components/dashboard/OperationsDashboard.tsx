@@ -258,7 +258,7 @@ export function OperationsDashboard({
         </div>
       </div>
 
-      <footer className="mt-auto border-t border-surface-border/60 pt-4 text-xs text-slate-500">
+      <footer className="mt-auto border-t border-[#e5dfd2] pt-4 text-xs sm:text-[13px] font-medium text-stone-600">
         <p>
           Operational coordination only. AIMBULENCE does not diagnose, triage, or prescribe, and
           processes synthetic data exclusively. Consequential actions require explicit human authorization.

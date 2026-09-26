@@ -4,17 +4,42 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
   body {
-    @apply h-full bg-surface text-slate-200 antialiased;
+    @apply h-full bg-[#f6f3eb] text-stone-800 antialiased selection:bg-amber-200 selection:text-stone-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom sleek scrollbar for warm cream theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #ede7dc;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cfc6b4;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a89f8d;
   }
 }
 
 @layer components {
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f3eb];
+  }
+
+  .glass-panel {
+    @apply rounded-2xl border border-[#e5dfd2] bg-[#fffdf9]/95 backdrop-blur-md shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .telemetry-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-xs font-bold tracking-wider transition-all duration-200;
   }
 }

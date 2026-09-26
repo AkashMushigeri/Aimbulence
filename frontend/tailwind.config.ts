@@ -12,10 +12,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        cream: {
+          50: "#fdfbf7",
+          100: "#fbf7ee",
+          200: "#f6f1e3",
+          300: "#ece4d0",
+          400: "#dfd3b7",
+          500: "#cfbf9c",
+          600: "#9c8c69",
+          700: "#6e6144",
+          800: "#473d2a",
+          900: "#272115",
+        },
         surface: {
-          DEFAULT: "#0b1220",
-          raised: "#111c2e",
-          border: "#1e2d45",
+          DEFAULT: "#fffdf9",
+          raised: "#f7f3ea",
+          border: "#e5dfd2",
+          elevated: "#f0eae0",
         },
         safety: {
           green: "#16a34a",

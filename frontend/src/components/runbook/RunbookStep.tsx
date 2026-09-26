@@ -19,32 +19,32 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
       data-testid={`runbook-step-${step.stepNumber}`}
       data-step-id={step.stepId}
       data-step-status={step.status}
-      className={`rounded-lg border p-3.5 transition-all ${
+      className={`rounded-2xl border p-4 sm:p-5 transition-all ${
         isStepPaused
-          ? "border-amber-500/70 bg-amber-950/20 ring-1 ring-amber-500/50"
+          ? "border-amber-400 bg-amber-50/90 ring-1 ring-amber-300 shadow-md shadow-amber-950/5"
           : isFailed
-          ? "border-rose-600/70 bg-rose-950/20"
+          ? "border-rose-400 bg-rose-50/90 shadow-md shadow-rose-950/5"
           : isRunning
-          ? "border-blue-500/60 bg-blue-950/20 ring-1 ring-blue-500/40"
+          ? "border-sky-400 bg-sky-50/90 ring-1 ring-sky-300 shadow-md shadow-sky-950/5"
           : isCompleted
-          ? "border-surface-border/70 bg-surface/30"
-          : "border-surface-border/40 bg-surface/10 opacity-75"
+          ? "border-[#e5dfd2] bg-[#fffdf9] hover:border-[#d8d0c0] shadow-xs"
+          : "border-[#e5dfd2]/80 bg-[#fbf9f4]/80 opacity-80"
       }`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3.5">
           <span
             data-testid={`step-number-${step.stepNumber}`}
-            className={`flex h-6 w-6 items-center justify-center rounded font-mono text-xs font-bold ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl font-mono text-xs font-black shadow-xs ${
               isStepPaused
-                ? "bg-amber-500 text-slate-950 font-black"
+                ? "bg-amber-500 text-white shadow-amber-400/30"
                 : isCompleted
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                 : isRunning
-                ? "bg-blue-500 text-white animate-pulse"
+                ? "bg-sky-600 text-white animate-pulse shadow-sky-500/40"
                 : isFailed
-                ? "bg-rose-500 text-white"
-                : "bg-slate-800 text-slate-400 border border-slate-700"
+                ? "bg-rose-600 text-white"
+                : "bg-[#ede7dc] text-stone-600 border border-[#e5dfd2]"
             }`}
           >
             {step.stepNumber}
@@ -53,15 +53,15 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
           <div>
             <h4
               data-testid={`step-title-${step.stepNumber}`}
-              className="text-sm font-semibold text-slate-100 leading-snug"
+              className="text-sm sm:text-base font-bold text-stone-900 leading-snug"
             >
               {step.name}
             </h4>
-            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-400 font-mono">
-              <span>{step.stepId}</span>
-              <span>•</span>
-              <span className="text-slate-300">tool:</span>
-              <code className="rounded bg-surface-elevated/70 px-1.5 py-0.5 text-blue-300">
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-600 font-mono">
+              <span className="font-semibold text-stone-500">{step.stepId}</span>
+              <span className="text-stone-400">•</span>
+              <span className="text-stone-500">tool:</span>
+              <code className="rounded bg-[#f0eae0] px-2 py-0.5 text-sky-800 font-bold border border-[#e5dfd2]">
                 {step.actionTool}
               </code>
             </div>
@@ -76,26 +76,26 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
           {Boolean(step.verification) && (
             <span
               data-testid={`step-${step.stepNumber}-verified`}
-              className="inline-flex items-center gap-1 rounded border border-emerald-500/50 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-emerald-300"
+              className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-2 py-0.5 font-mono text-xs font-bold uppercase text-emerald-900 shadow-xs"
             >
-              <span>✓</span>
-              <span>VERIFIED</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+              <span>✓ VERIFIED</span>
             </span>
           )}
 
           {/* Step status label */}
           <span
             data-testid={`step-status-${step.stepNumber}`}
-            className={`rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${
+            className={`rounded px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-wider ${
               isCompleted
-                ? "bg-emerald-500/15 text-emerald-300"
+                ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
                 : isRunning
-                ? "bg-blue-500/20 text-blue-300 animate-pulse"
+                ? "border border-sky-300 bg-sky-50 text-sky-800 animate-pulse"
                 : isStepPaused
-                ? "bg-amber-500/20 text-amber-200"
+                ? "border border-amber-300 bg-amber-50 text-amber-800"
                 : isFailed
-                ? "bg-rose-500/20 text-rose-300"
-                : "bg-slate-800 text-slate-400"
+                ? "border border-rose-300 bg-rose-50 text-rose-800"
+                : "border border-stone-200 bg-stone-100 text-stone-600"
             }`}
           >
             {step.status}
@@ -104,7 +104,7 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
       </div>
 
       {step.description && (
-        <p className="mt-2 text-xs text-slate-400 leading-relaxed pl-8.5">
+        <p className="mt-2.5 text-xs sm:text-[13px] text-stone-700 leading-relaxed pl-11 font-medium">
           {step.description}
         </p>
       )}
@@ -113,15 +113,15 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
       {isStepPaused && (
         <div
           data-testid="agent-paused-banner"
-          className="mt-3 rounded border border-amber-500/60 bg-amber-950/40 p-3 text-xs text-amber-200"
+          className="mt-3.5 rounded-xl border border-amber-300 bg-amber-50/95 p-4 text-xs sm:text-[13px] text-amber-950 shadow-sm"
         >
-          <div className="flex items-center gap-2 font-mono font-bold tracking-wider text-amber-300">
-            <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+          <div className="flex items-center gap-2 font-mono font-black tracking-wider text-amber-900">
+            <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
             <span data-testid="human-authorization-required">
               AGENT PAUSED · HUMAN AUTHORIZATION REQUIRED
             </span>
           </div>
-          <p className="mt-1 text-slate-300">
+          <p className="mt-1 text-stone-700 leading-relaxed font-medium">
             Execution is halted at a consequential TrueForge safety checkpoint. Autonomous
             progression is strictly prohibited. Awaiting authenticated operator authorization.
           </p>
@@ -132,9 +132,9 @@ export function RunbookStep({ step, isCurrent, isPaused }: RunbookStepProps) {
       {isFailed && step.error && (
         <div
           data-testid={`step-error-${step.stepNumber}`}
-          className="mt-2.5 rounded border border-rose-600/50 bg-rose-950/40 p-2.5 text-xs text-rose-200"
+          className="mt-3 rounded-xl border border-rose-300 bg-rose-50 p-3.5 text-xs sm:text-[13px] text-rose-900 shadow-xs"
         >
-          <span className="font-mono font-bold uppercase text-rose-300">Step Failure:</span>{" "}
+          <span className="font-mono font-bold uppercase text-rose-800">Step Failure:</span>{" "}
           {step.error}
         </div>
       )}

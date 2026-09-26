@@ -21,9 +21,9 @@ export function generateMetadata(): Metadata {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-full">
-        <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-6 py-10">
+    <html lang="en" className="light">
+      <body className="min-h-full bg-[#f6f3eb] bg-[radial-gradient(ellipse_80%_80%_at_50%_-10%,rgba(217,119,6,0.06),rgba(246,243,235,0))] text-stone-800">
+        <div className="mx-auto flex min-h-full w-full max-w-[1600px] flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {children}
         </div>
       </body>

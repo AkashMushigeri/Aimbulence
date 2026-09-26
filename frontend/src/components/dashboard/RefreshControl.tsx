@@ -26,7 +26,7 @@ export function RefreshControl({ lastRefreshed }: { lastRefreshed?: string }) {
         <span
           data-testid="last-refresh-time"
           suppressHydrationWarning
-          className="hidden font-mono text-xs text-slate-400 sm:inline-block"
+          className="hidden font-mono text-xs font-medium text-stone-600 sm:inline-block"
         >
           {formattedTime ? `Refreshed: ${formattedTime}` : null}
         </span>
@@ -37,10 +37,10 @@ export function RefreshControl({ lastRefreshed }: { lastRefreshed?: string }) {
         disabled={pending}
         onClick={handleRefresh}
         aria-label="Refresh operational dashboard data"
-        className="focus-ring inline-flex items-center gap-1.5 rounded border border-surface-border bg-surface px-3 py-1 font-mono text-xs uppercase tracking-wide text-slate-200 transition-colors hover:border-sky-500/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="focus-ring inline-flex items-center gap-2 rounded-lg border border-[#d8d0c0] bg-[#fffdf9] px-3.5 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-stone-800 shadow-sm transition-all hover:border-stone-400 hover:bg-[#f5efe3] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span
-          className={`inline-block h-2 w-2 rounded-full ${pending ? "animate-ping bg-sky-400" : "bg-emerald-400"}`}
+          className={`inline-block h-2 w-2 rounded-full ${pending ? "animate-ping bg-sky-500" : "bg-emerald-600"}`}
           aria-hidden="true"
         />
         {pending ? "Refreshing…" : "Refresh"}

@@ -45,13 +45,13 @@ export function DecisionControls({
   return (
     <div
       data-testid="decision-controls"
-      className="space-y-4 rounded-lg border border-surface-border bg-surface/50 p-4"
+      className="space-y-4 rounded-2xl border border-[#e5dfd2] bg-[#fffdf9] p-5 sm:p-6 shadow-xs"
     >
-      <div className="border-b border-surface-border/60 pb-2">
-        <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
+      <div className="border-b border-[#ece5d8] pb-3.5">
+        <h4 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700">
           Operator Human Decision Gate
         </h4>
-        <p className="mt-0.5 text-xs text-slate-400">
+        <p className="mt-0.5 text-xs sm:text-[13px] text-stone-600 font-medium">
           Consequential actions require deliberate human operator authentication before submission.
         </p>
       </div>
@@ -60,20 +60,20 @@ export function DecisionControls({
         <div
           data-testid="decision-error-banner"
           role="alert"
-          className="rounded border border-red-500/40 bg-red-950/40 p-3 text-xs text-red-200"
+          className="rounded-xl border border-red-300 bg-red-50 p-4 text-xs sm:text-[13px] text-red-900 shadow-xs"
         >
-          <strong className="font-semibold">Backend Decision Error: </strong>
+          <strong className="font-bold font-mono">Backend Decision Error: </strong>
           {error}
         </div>
       ) : null}
 
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div>
           <label
             htmlFor="operator-name-input"
-            className="block text-xs font-medium uppercase tracking-wider text-slate-300"
+            className="block font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700"
           >
-            Authorizing Human Authority <span className="text-red-400">*</span>
+            Authorizing Human Authority <span className="text-red-600">*</span>
           </label>
           <input
             id="operator-name-input"
@@ -84,10 +84,10 @@ export function DecisionControls({
             onChange={(e) => setOperatorName(e.target.value)}
             disabled={isSubmitting || submitted}
             placeholder="e.g., Dr. Eleanor Vance, Trauma Medical Director"
-            className="mt-1 w-full rounded border border-surface-border bg-surface px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="mt-1.5 w-full rounded-xl border border-[#d8d0c0] bg-[#fbf9f4] px-4 py-3 font-mono text-sm text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
           />
           {!isValidOperator && operatorName.length > 0 ? (
-            <p className="mt-1 text-xs text-rose-400">
+            <p className="mt-1 text-xs text-rose-600 font-mono font-semibold">
               Authority name must be at least 2 characters.
             </p>
           ) : null}
@@ -96,7 +96,7 @@ export function DecisionControls({
         <div>
           <label
             htmlFor="operator-reason-input"
-            className="block text-xs font-medium uppercase tracking-wider text-slate-300"
+            className="block font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700"
           >
             Clinical / Operational Rationale
           </label>
@@ -108,7 +108,7 @@ export function DecisionControls({
             onChange={(e) => setReason(e.target.value)}
             disabled={isSubmitting || submitted}
             placeholder="Document clinical rationale or justification for authorizing or denying this surge preemption..."
-            className="mt-1 w-full rounded border border-surface-border bg-surface px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="mt-1.5 w-full rounded-xl border border-[#d8d0c0] bg-[#fbf9f4] px-4 py-3 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
           />
         </div>
       </div>
@@ -122,7 +122,7 @@ export function DecisionControls({
           disabled={true}
           title="Modification is not supported by the backend TrueForge approval contract."
           aria-disabled="true"
-          className="cursor-not-allowed rounded border border-slate-700 bg-surface/30 px-3 py-2 text-xs font-semibold text-slate-500"
+          className="cursor-not-allowed rounded-xl border border-stone-200 bg-[#f4efe4] px-3.5 py-2.5 font-mono text-xs font-bold text-stone-500"
         >
           MODIFY (NOT SUPPORTED BY CONTRACT)
         </button>
@@ -133,7 +133,7 @@ export function DecisionControls({
           data-testid="decision-reject-btn"
           disabled={disabled}
           onClick={() => handleDecision("REJECT")}
-          className="rounded border border-rose-500/60 bg-rose-950/40 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-rose-300 transition-colors hover:bg-rose-900/60 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 font-mono text-xs sm:text-[13px] font-extrabold uppercase tracking-wider text-rose-900 shadow-xs transition-all hover:bg-rose-100 hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "PROCESSING..." : "REJECT / DENY PREEMPTION"}
         </button>
@@ -144,7 +144,7 @@ export function DecisionControls({
           data-testid="decision-approve-btn"
           disabled={disabled}
           onClick={() => handleDecision("APPROVE")}
-          className="rounded border border-emerald-500/80 bg-emerald-600 px-5 py-2 font-mono text-xs font-extrabold uppercase tracking-wider text-slate-950 transition-colors hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-emerald-600 bg-emerald-600 px-5 py-2.5 font-mono text-xs sm:text-[13px] font-black uppercase tracking-wider text-white shadow-md shadow-emerald-600/30 transition-all hover:bg-emerald-500 hover:shadow-emerald-600/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "SUBMITTING AUTHORIZATION..." : "AUTHORIZE & EXECUTE ACTION"}
         </button>
@@ -154,7 +154,7 @@ export function DecisionControls({
         <p
           data-testid="submission-in-progress"
           aria-live="assertive"
-          className="text-right font-mono text-xs text-sky-400"
+          className="text-right font-mono text-xs text-sky-400 animate-pulse"
         >
           Communicating decision to TrueForge checkpoint on backend...
         </p>
