@@ -107,6 +107,23 @@ python -m pytest -v backend/tests
 
 ---
 
+## Operational Tool Layer (Phase 2)
+
+The operational tools in `backend/app/tools/` operate directly on the persistent SQLite database of record:
+
+| Tool | Module | Safety Tier | Description |
+| :--- | :--- | :---: | :--- |
+| `get_hospital_capacity` | `hospital_tools.py` | 🟢 GREEN | Reads live emergency bed, ICU, OR, staff, ambulance, and blood product capacity. |
+| `calculate_resource_shortage` | `hospital_tools.py` | 🟢 GREEN | Computes real resource deficits dynamically against incident casualty demand. |
+| `get_resource_status` | `resource_tools.py` | 🟢 GREEN | Queries live inventories of beds, ORs, staff, ambulances, and blood bank units. |
+| `create_operational_task` | `task_tools.py` | 🟢 GREEN | Persists internal operational coordination tasks in SQLite. |
+| `reserve_resource` | `resource_tools.py` | 🟡 YELLOW / 🔴 RED | Safely allocates available resources; strictly blocks unauthorized preemption of in-use surgical suites. |
+| `propose_consequential_action`| `resource_tools.py` | 🔴 RED | Formulates high-impact action proposals requiring human operator authorization. |
+| `execute_consequential_action`| `resource_tools.py` | 🔴 RED | Enforces requirement for an explicit human authorization token before executing consequential mutations. |
+| `verify_operational_status` | `verification_tools.py` | 🟢 GREEN | Queries database post-execution to verify that expected state materialized. |
+
+---
+
 ## Architecture Note: Phase 3 Integration
 
 In Phase 3, the AIMBULENCE agent harness will connect directly to this backend foundation:
