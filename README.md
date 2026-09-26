@@ -1,360 +1,306 @@
-# AIMBULENCE
+# AIMBULENCE 🚑
 
 > **AI Emergency Hospital Operations Runbook Executor**  
 > Built for the **Agents That Act** Hackathon (TrueFoundry × Polaris / HackCulture)  
 > **Theme:** RUNBOOK EXECUTOR  
-> **Repository:** [https://github.com/AkashMushigeri/Aimbulence](https://github.com/AkashMushigeri/Aimbulence)
+> **Tagline:** *"Act Fast. Coordinate Smart. Keep Humans in Control."*  
+> **Repository:** [https://github.com/AkashMushigeri/Aimbulence](https://github.com/AkashMushigeri/Aimbulence)  
+> **Current Branch:** `member-1`  
+> **Test Status:** 🟢 48/48 Backend Pytest Passed | 🟢 142/142 Frontend Vitest Passed  
 
 ---
 
-## One-Line Description
-An autonomous, safety-gated AI operational runbook executor that coordinates hospital capacity, staff dispatch, and critical resources during mass-casualty emergencies on TrueForge.
+## Executive Overview
+
+**AIMBULENCE** is an autonomous, safety-gated AI operational runbook executor that coordinates hospital surge capacity, staff mobilization, and critical supplies during Mass Casualty Incidents (MCIs). 
+
+During catastrophic events (such as a 42-casualty multi-vehicle highway collision), hospital emergency operations centers are overwhelmed by dozens of simultaneous logistical phone calls, resource checks, and manual checklists. Static paper runbooks create deadly coordination bottlenecks.
+
+AIMBULENCE transforms static disaster response procedures into an **interactive, observable, and verifiable execution pipeline**. The agent reads real hospital operational state, autonomously performs routine operational preparations, and **strictly halts at consequential decisions** (such as commandeering active surgical suites or declaring disaster status) until an authorized human operator grants cryptographic approval.
+
+### Core Architectural Axiom
+> **"Autonomous in execution, but not autonomous in authority."**
 
 ---
 
-## Problem
-During a Mass-Casualty Incident (MCI)—such as a multi-vehicle highway collision, transit accident, or structural collapse—hospitals face sudden, overwhelming surges of incoming trauma casualties (e.g., 40+ acute arrivals within minutes). 
+## Key Features
 
-In these critical moments, hospital operations teams experience extreme friction:
-- **Operational Chaos & Cognitive Overload:** Staff must evaluate bed availability, surgical capacity, nursing shortages, blood bank reserves, and oxygen supplies simultaneously while coordinating under high stress.
-- **Static, Inefficient Runbooks:** Hospital disaster plans reside in static paper binders or static PDFs that humans must manually parse, calculate, and coordinate step-by-step.
-- **Fragmented Tooling & Delayed Action:** Emergency managers toggle between EHR bed boards, staff paging systems, OR schedulers, and facility logs, causing critical delays in surge readiness.
-- **Risk of Unauthorized Escalations:** Without clear authority boundaries, automated or hurried decisions risk disruptive changes (diverting ambulances, cancelling elective surgeries, activating regional trauma mutual-aid) without executive clinical oversight.
-
----
-
-## Solution
-**AIMBULENCE** is an AI Emergency Hospital Operations Runbook Executor. It bridges real operational hospital data systems and dynamic emergency response procedures.
-
-Instead of acting as a conversational text assistant, AIMBULENCE operates as a runbook execution agent:
-1. Ingests incoming emergency dispatch notifications.
-2. Connects to real hospital operational systems via tool/MCP interfaces to assess real-time bed, staff, and supply availability.
-3. Selects and instantiates the verified Mass-Casualty Hospital Response Runbook.
-4. Generates a phased operational response plan.
-5. Autonomously executes safe, reversible tasks (e.g., resource auditing, internal staging, notifications).
-6. **Hard-stops at consequential decision checkpoints**, requesting human operator authorization with transparent impact analysis.
-7. Resumes execution post-approval and independently verifies that target operational states were reached.
+- **⚡ Autonomous Fast-Track Coordination:** Automatically queries operational telemetry, calculates acute resource deficits, dispatches emergency triage checklists, and stages uncrossmatched blood reserves.
+- **🛡️ TrueForge Human-in-the-Loop Checkpoint:** High-impact, irreversible operational actions (RED tier) trigger an automated pause. The system generates an immutable proposal and requires human sign-off before mutating the database.
+- **🔐 Cryptographically Bound Single-Use Tokens:** Approvals are secured with 32-byte cryptographically bound tokens locked to the specific action ID and target resource. Replay attacks, cross-resource reuse, and forged executions are rejected.
+- **🛑 Zero-Mutation Rejection Guarantee:** If an operator rejects a proposed consequential action, the database remains 100% unmutated. Zero preemptive or speculative writes occur.
+- **💾 ACID-Compliant SQLite Persistence:** Complete runbook state, step logs, approval checkpoints, and operational resources survive server reboots and process restarts.
+- **📊 Real-Time Operator Control Center:** Next.js 14 dashboard with live telemetry meters, visual MCI-01 step progression, and interactive TrueForge approval modals.
+- **📜 Append-Only Audit Trail:** Microsecond-precision audit logging of every query, calculation, task dispatch, approval, and state verification.
 
 ---
 
-## Why This Is an Agent (Not a Chatbot)
-AIMBULENCE is fundamentally distinct from an informational LLM chatbot:
-- **Reaches Real External Systems:** Interacts directly with database systems, scheduling backends, and communication APIs through standard Model Context Protocol (MCP) and tool interfaces.
-- **Reads & Maintains Operational State:** Maintains an active state model of hospital surge capacity, tracking shifts in available beds, operating theaters, and medical equipment.
-- **Reasons Over Executable Runbooks:** Translates high-level emergency protocols into ordered, dependency-aware tool actions rather than freeform text answers.
-- **Performs Real Actions:** Issues concrete state mutations—updating operational statuses, reserving staging areas, and dispatching on-call resource mobilization.
-- **Verifies State Changes:** Never assumes action success; queries connected systems after execution to confirm that changes materialized.
-- **Enforces Safety Boundaries:** Knows precisely when to stop. Consequential actions require explicit human authorization before execution.
-- **Stateful Resumption:** Pauses at approval gates and continues multi-step execution seamlessly once authorized by a human coordinator.
+## Why AIMBULENCE Is an Agent (Not a Chatbot)
 
----
-
-## Hackathon Alignment: Agents That Act
-This project is engineered to strictly satisfy the core tenets of the **Agents That Act** hackathon:
-
-| Hackathon Requirement | AIMBULENCE Architectural Implementation |
+| Conventional Chatbot | AIMBULENCE Runbook Executor |
 | :--- | :--- |
-| **1. Real System / Tool Access** | Reaches a real operational data store and service endpoints via standard MCP/tool calls. No mocked or fake placeholder return functions in the final deployment. |
-| **2. Sandboxed Code Execution** | Utilizes an isolated execution sandbox for deterministic mathematical models (surge capacity formulas, triage shortage calculations). |
-| **3. Human Approval Checkpoint** | Enforces a strict TrueForge approval gate prior to executing any consequential, irreversible, or high-impact operational action (RED actions). |
-| **4. TrueForge Harness** | TrueForge serves as the foundational agent runtime, MCP tool provider, checkpoint coordinator, and state management engine. |
-| **5. End-to-End Execution** | Demonstrates a full autonomous loop: Emergency Detection → State Assessment → Plan Generation → Safe Action → Human Gate → Continued Action → State Verification. |
+| Generates unstructured text summaries. | Interacts directly with external operational databases via MCP and typed tool interfaces. |
+| Has no concept of persistent operational state. | Maintains an active, ACID-persisted state model of hospital capacity and resources. |
+| Cannot perform real actions in external systems. | Issues concrete state mutations (stages beds, reserves supplies, reassigns suites). |
+| Assumes actions succeed once hallucinated. | Independently queries connected systems post-execution to **verify** state changes. |
+| Operates without strict safety boundaries. | Enforces a hard-stop TrueForge security checkpoint for consequential actions. |
+| Stateless conversation. | Stateful, resumable state machine that survives process restarts mid-runbook. |
 
 ---
 
-## Core Workflow
-The agent executes an iterative operational loop:
+## System Architecture
 
-```
-DETECT ──► ASSESS ──► SELECT RUNBOOK ──► PLAN ──► ACT ──► VERIFY ──► ADAPT / ESCALATE
+```mermaid
+flowchart TD
+    subgraph UI ["Operator Control Center (Next.js 14)"]
+        A1["Live Hospital Telemetry"]
+        A2["MCI-01 Runbook Stepper"]
+        A3["TrueForge Checkpoint Modal"]
+        A4["Typed Server Actions Layer"]
+        A1 --- A4
+        A2 --- A4
+        A3 --- A4
+    end
+
+    subgraph API ["FastAPI REST Services (:8000)"]
+        B1["/api/hospital & /api/resources"]
+        B2["/api/incidents"]
+        B3["/api/runbooks/mci-01"]
+        B4["/api/approvals (TrueForge Gate)"]
+        B5["/api/demo/reset"]
+    end
+
+    subgraph ENGINE ["Runbook & Agent Core"]
+        C1["MCI-01 State Machine"]
+        C2["Deterministic Step Sequencer"]
+        C3["TrueForge Checkpoint Engine"]
+        C4["Shortage Math Sandbox"]
+    end
+
+    subgraph MCP ["Tool Execution Boundary (MCP)"]
+        D1["mcp_get_hospital_capacity"]
+        D2["mcp_calculate_resource_shortage"]
+        D3["mcp_create_operational_task"]
+        D4["mcp_reserve_resource"]
+        D5["mcp_verify_operational_status"]
+    end
+
+    subgraph DB ["Persistent Operational Store (SQLite / ACID)"]
+        E1[("Hospital Beds & Department Records")]
+        E2[("Physical Resources & Operating Suites")]
+        E3[("Runbook Execution & Step Records")]
+        E4[("Action Proposals & Security Tokens")]
+        E5[("Immutable Audit Trail")]
+    end
+
+    A4 -->|"HTTP / REST API"| API
+    B3 --> C1
+    B4 --> C3
+    C1 --> C2
+    C2 --> C4
+    C2 -->|"Tool Calls"| MCP
+    C3 -->|"Token Gated Execution"| MCP
+    MCP -->|"SQLAlchemy ORM"| DB
+    C1 -->|"State Persistence"| DB
+    C3 -->|"Proposal & Token Persistence"| DB
 ```
 
-1. **DETECT:** Ingests incident telemetry and casualty alert feeds.
-2. **ASSESS:** Queries real connected hospital data to determine immediate availability across critical resources.
-3. **SELECT RUNBOOK:** Matches incident profile against standardized emergency runbook templates.
-4. **PLAN:** Produces an executable, phased action sequence mapping runbook steps to tool calls.
-5. **ACT:** Executes non-consequential (GREEN) actions automatically; halts at consequential (RED) actions for human sign-off.
-6. **VERIFY:** Performs follow-up inspections on connected systems to ensure intended operational modifications took effect.
-7. **ADAPT / ESCALATE:** Re-evaluates remaining capacity bottlenecks; prompts human command if interventions fail or resource limits persist.
+Detailed architectural specifications and component boundaries are documented in [docs/architecture.md](docs/architecture.md).
 
 ---
 
-## First Use Case & Scenario
-- **Incident:** Mass-Casualty Road Collision (Multi-Vehicle Highway Transit Accident).
-- **Incident Scale:** 42 acute casualties anticipated to arrive within 25 minutes.
-- **Hospital Baseline Constraints:**
-  - Emergency Department (ED) Beds: 12 available (Deficit: 30)
-  - Intensive Care Unit (ICU) Beds: 4 available
-  - Operating Rooms (OR): 2 staffed and open; 3 currently in non-urgent elective use
-  - Trauma Surgeons: 3 on duty
-  - Emergency Care Nurses: 8 available
-  - Blood Bank: 18 units O-negative blood on hand
-- **Agent Mission:** Mobilize surge capacity, audit resource deficits, stage non-urgent areas for triage, and request command approval to initiate surge reallocations before ambulances arrive.
+## Safety and Human Governance Model
+
+AIMBULENCE implements a three-tier action classification framework:
+
+| Tier | Category | Autonomy | Operational Blast Radius | Examples |
+| :---: | :---: | :---: | :---: | :--- |
+| 🟢 | **GREEN** | **Fully Autonomous** | Zero / Internal Only | Read bed capacity, run shortage calculations, stage triage checklists, record audit logs. |
+| 🟡 | **YELLOW** | **Autonomous with Notification** | Low / Readily Reversible | Stage auxiliary cots in ambulance bay, reserve uncrossmatched blood units, pre-alert on-call nurses. |
+| 🔴 | **RED** | **Human Approval Required** | High / Disruptive / Irreversible | Commandeer active Operating Room (`OR-3`), suspend elective procedures, declare Code Orange. |
+
+### The TrueForge Checkpoint Flow
+1. **DETECT:** Agent identifies acute surgical shortage requiring an additional operating suite.
+2. **PROPOSE:** Agent formulates proposal to commandeer `OR-3`, generates a 32-byte token digest, and pauses execution.
+3. **ZERO MUTATION:** Database remains untouched; `OR-3` remains allocated to its elective procedure.
+4. **HUMAN GATE:** The dashboard presents the TrueForge modal with full blast-radius analysis to the clinical operator.
+5. **DECISION:**
+   - **Authorize:** The single-use token is transmitted to `/api/approvals/{id}/respond`. Token is consumed, `OR-3` is commandeered in SQLite, post-action verification confirms state, and runbook finishes Steps 11–15.
+   - **Reject:** The action is permanently denied, zero state changes occur, and runbook enters `HALTED_REJECTED`.
+
+Full safety protocols and cryptographic proofs are detailed in [docs/safety_model.md](docs/safety_model.md).
 
 ---
 
-## Mass-Casualty Response Runbook (`MCI-01`)
-The initial vertical slice focuses on this structured operational sequence:
+## Mass Casualty Response Runbook (`MCI-01`)
+
+The implemented MCI-01 emergency protocol executes 15 ordered operational steps:
 
 ```
- 1. Receive Emergency Incident Alert
- 2. Validate Incident Parameters & Integrity
- 3. Assess Incident Severity & Projected Casualty Intake
- 4. Query Hospital Operational Capacity (ED, ICU, OR)
- 5. Query Staff Availability (Trauma Specialists, Surgical Teams, Emergency Nurses)
- 6. Inspect Critical Consumables & Blood Bank Reserves
- 7. Compute Projected Deficits & Capacity Shortages
- 8. Synthesize Phased Response Plan
- 9. Execute Safe Actions [GREEN] (Internal alerts, triage staging, task creation)
-10. Halt at Consequential Action Checkpoint [RED]
-11. Present Authorization Request with Impact Briefing to Human Operator
-12. Await Human Decision (Approve / Modify / Reject)
-13. Execute Approved Action (e.g., Code Orange declaration, elective OR suspension)
-14. Verify Operational State on Real Connected System
-15. Log Immutable Audit Record; Escalate if Deficits Remain Unresolved
-```
-
----
-
-## Safety and Human-in-the-Loop Model
-
-### Action Classification Framework
-
-> **"The agent is autonomous in execution, but not autonomous in authority."**
-
-Actions are strictly categorized into three safety tiers:
-
-| Tier | Category | Autonomy | Action Examples |
-| :---: | :---: | :---: | :--- |
-| 🟢 | **GREEN** | **Automatic** | Read operational databases; calculate shortage metrics; stage emergency triage checklists; post internal staff notifications; create audit records; verify action outcomes. |
-| 🟡 | **YELLOW** | **Confirmation** | Reserve auxiliary staging beds; reassign on-call nursing teams within standard shift parameters; request routine inventory transfers from regional storage. |
-| 🔴 | **RED** | **Human Approval Required** | Declare Code Orange / Hospital Disaster Status; suspend elective surgeries; clear active recovery bays; divert incoming non-trauma ambulances; issue regional mutual-aid calls. |
-
-### Operational Boundaries & Non-Goals
-AIMBULENCE is an **operational coordinator**, NOT a clinical practitioner:
-- ❌ **Does NOT diagnose patients** or recommend diagnostic tests.
-- ❌ **Does NOT prescribe medications** or recommend pharmaceutical dosing.
-- ❌ **Does NOT make clinical triage decisions** (e.g., assigning clinical triage tags to individual human beings).
-- ❌ **Does NOT replace medical doctors, nurses, or hospital administrators.**
-- ❌ **Does NOT use real patient records or Personally Identifiable Information (PII).** All operational hospital data is synthetic.
-- ❌ **Does NOT dispatch public alerts or external emergency service re-routings** without explicit human executive sign-off.
-
----
-
-## Architecture
-
-```
-                  EMERGENCY INCIDENT
-               (Simulated Mass Casualty)
-                          │
-                          ▼
-               ┌──────────────────────┐
-               │   AIMBULENCE AGENT   │
-               └──────────┬───────────┘
-                          │
-                          ▼
-               ┌──────────────────────┐
-               │      TRUEFORGE       │
-               │ (Harness / Checkpoint│
-               │  Runtime & State)    │
-               └──────────┬───────────┘
-                          │
-         ┌────────────────┴────────────────┐
-         ▼                                 ▼
-┌──────────────────┐             ┌───────────────────┐
-│  RUNBOOK ENGINE  │             │ SANDBOX EXECUTION │
-│ (MCI Procedures) │             │ (Math / Shortage) │
-└────────┬─────────┘             └─────────┬─────────┘
-         │                                 │
-         └────────────────┬────────────────┘
-                          ▼
-               ┌──────────────────────┐
-               │   MCP / TOOL LAYER   │
-               └──────────┬───────────┘
-                          │
-         ┌────────────────┴────────────────┐
-         ▼                                 ▼
-┌──────────────────┐             ┌───────────────────┐
-│  REAL CONNECTED  │             │  VERIFICATION &   │
-│  DATABASE/SYSTEM │             │  STATE INSPECTOR  │
-│ (Synthetic Ops)  │             └───────────────────┘
-└────────┬─────────┘
-         │
-         ▼
- ╔═══════════════════════════════════════════════════╗
- ║           TRUEFORGE APPROVAL CHECKPOINT           ║
- ║        [Human Authorization Gate (RED)]          ║
- ╚═══════════════════════════════════════════════════╝
-         │                                 │
-         ▼                                 ▼
-  [APPROVED]                          [REJECTED]
-         │                                 │
-         ▼                                 ▼
-Execute Consequential Action        Halt / Adapt Runbook
-         │
-         ▼
-Verify State Mutated on System
-         │
-         ▼
-Update Dashboard & Audit Trail
+ 1. INGEST_INCIDENT           — Receive Mass Casualty Alert (42 casualties inbound)
+ 2. VALIDATE_INCIDENT         — Verify telemetry integrity and incident scale
+ 3. ASSESS_SEVERITY           — Project triage breakdown (Immediate, Delayed, Minor)
+ 4. QUERY_HOSPITAL_CAPACITY   — Query real-time bed occupancy (ED: 12 free, ICU: 4 free)
+ 5. QUERY_STAFF_AVAILABILITY  — Inspect trauma specialist and nurse shift rosters
+ 6. INSPECT_CONSUMABLES       — Audit O-negative blood reserves and airway carts
+ 7. CALCULATE_DEFICITS        — Deterministic sandbox math (30 bed deficit, 2 OR deficit)
+ 8. SYNTHESIZE_PLAN           — Generate phased mobilization and surge plan
+ 9. EXECUTE_GREEN_ACTIONS     — Dispatch trauma alerts, stage bay, reserve blood
+─── ⏸️ TRUEFORGE CHECKPOINT GATE ────────────────────────────────────────────────
+10. COMMANDEER_OR3 [RED]      — PAUSE: Await Human Approval to commandeer OR-3
+─── ▶️ POST-APPROVAL RESUMPTION ─────────────────────────────────────────────────
+11. NOTIFY_SURGICAL_TEAMS     — Mobilize standby trauma surgery teams to OR-3
+12. PREPARE_RECOVERY_BAY      — Clear post-anesthesia care unit beds
+13. MOBILIZE_TRANSPORT        — Dispatch internal gurneys and patient transport
+14. VERIFY_SYSTEM_READINESS   — Confirm all resource mutations materialized on disk
+15. FINALIZE_MCI_READINESS    — Generate final hospital readiness score & audit seal
 ```
 
 ---
 
 ## Technology Stack
 
-> *Note: Components marked as **Planned** reflect architecture designs for implementation phases.*
-
-- **Agent Runtime & Harness:** TrueForge *(Planned - Mandatory Requirement)*
-- **LLM Provider:** Anthropic / OpenAI / Gemini via TrueForge integration *(Planned)*
-- **Tool Protocol:** Model Context Protocol (MCP) *(Planned)*
-- **Backend Framework:** Python 3.11+ / FastAPI *(Planned)*
-- **Frontend / Operator Dashboard:** React / Next.js / Tailwind CSS *(Planned)*
-- **Connected Operational Store:** Real Relational Database (PostgreSQL / SQLite with typed operational schema) *(Planned)*
-- **Isolated Code Sandbox:** Containerized / Sandboxed Python runtime for capacity algorithms *(Planned)*
-- **Version Control & CI:** Git / GitHub *(Active)*
+- **Backend:** Python 3.11+, FastAPI, SQLAlchemy, Pydantic v2
+- **Agent Harness & Safety:** TrueForge Human-in-the-Loop Checkpoints, MCP Tool Interface
+- **Database:** Persistent ACID SQLite (WAL mode)
+- **Frontend Dashboard:** Next.js 14 (App Router), TypeScript, Tailwind CSS, Lucide React
+- **Testing & Quality Assurance:** Pytest, pytest-asyncio, Vitest, Testing Library
 
 ---
 
-## Planned Project Structure
+## Project Structure
+
 ```
 Aimbulence/
-├── README.md                  # Project overview and hackathon guide
-├── instruction.md             # Developer & AI agent operating instructions
-├── LICENSE                    # MIT License
-├── .gitignore                 # Environment and build artifact exclusions
-├── .env.example               # Template for environment configuration
-│
-├── backend/                   # Member 1: Agent & Operations Engine (Planned)
+├── backend/
 │   ├── app/
-│   │   ├── agent/             # TrueForge agent definition & loop
-│   │   ├── runbooks/          # Machine-readable MCI runbooks
-│   │   ├── tools/             # MCP tools (DB connector, notification, capacity)
-│   │   ├── sandbox/           # Sandboxed code execution for shortage math
-│   │   ├── models/            # Pydantic data schemas
-│   │   └── api/               # REST API & WebSocket endpoints
-│   ├── tests/                 # Automated test suite
-│   └── requirements.txt       # Python dependencies
+│   │   ├── agent/               # TrueForge runner & approval cycle harness
+│   │   ├── api/routes/          # REST endpoints (hospital, runbooks, approvals, demo)
+│   │   ├── approval/            # TrueForge Checkpoint Manager & token security
+│   │   ├── mcp/                 # Model Context Protocol server & tool adapters
+│   │   ├── models/              # SQLAlchemy & Pydantic domain models
+│   │   ├── runbooks/            # MCI-01 state machine & step execution engine
+│   │   ├── services/            # SQLite database session & demo reset services
+│   │   └── tools/               # Operational tools (capacity, shortage, tasks, verify)
+│   └── tests/                   # 48 Automated backend integration tests
 │
-├── frontend/                  # Member 2: Operator UI & Visualizer (Planned)
+├── frontend/
 │   ├── src/
-│   │   ├── components/        # Dashboard, Approval Checkpoint Modal, Runbook Visualizer
-│   │   ├── pages/             # Live Operations Control Center
-│   │   └── services/          # API client
-│   ├── package.json
-│   └── tsconfig.json
+│   │   ├── app/                 # Next.js 14 App Router & typed server actions
+│   │   ├── components/          # Dashboard panels, TrueForge modal, telemetry widgets
+│   │   ├── lib/                 # Tested mappers, domain types, API clients
+│   │   └── services/            # Operations service bridge
+│   └── tests/                   # 142 Automated Vitest frontend tests
 │
-└── docs/                      # Technical references & runbook specifications (Planned)
-    ├── architecture.md
-    └── runbooks/
+└── docs/                        # Complete technical specifications & demo guides
+    ├── architecture.md          # Full system architecture & Mermaid diagrams
+    ├── safety_model.md          # Action tiers, token security & zero-mutation proof
+    ├── demo_script.md           # 3-5 minute live presentation script & cues
+    ├── api_contract.md          # REST API schemas & payload contracts
+    └── phase7_e2e_validation.md # E2E test matrix & security verification
 ```
 
 ---
 
-## Setup & Local Development (Planned)
+## Setup & Local Development
 
-> [!NOTE]
-> Implementation is currently in **Phase 0 (Documentation)**. Setup commands below represent the target development configuration.
+### 1. Prerequisites
+- **Python:** 3.11+ (virtual environment recommended)
+- **Node.js:** 20+ LTS or 22+ LTS
+- **npm:** 9+
 
-### Prerequisites (Planned)
-- Python 3.11+
-- Node.js 18+ & npm
-- TrueForge CLI & Account Credentials
-- Git
-
-### Backend Setup (TODO - Phase 1)
+### 2. Backend Setup
 ```bash
 # Clone the repository
 git clone https://github.com/AkashMushigeri/Aimbulence.git
 cd Aimbulence
 
-# Setup Python Virtual Environment (TODO)
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+# Setup Python virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate   # On Linux/macOS: source .venv/bin/activate
 
-# Install Dependencies (TODO)
+# Install dependencies
 pip install -r backend/requirements.txt
 
-# Configure Environment Variables (TODO)
-cp .env.example .env
+# Start backend server (runs on http://localhost:8000)
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Frontend Setup (TODO - Phase 1)
+### 3. Frontend Setup
 ```bash
-# Navigate to frontend (TODO)
+# In a separate terminal, navigate to frontend
 cd frontend
+
+# Install dependencies
 npm install
 
-# Run development server (TODO)
+# Start Next.js development server (runs on http://localhost:3000)
 npm run dev
 ```
 
----
-
-## Configuration
-
-Configuration will be managed via environment variables. **No secret, API key, or credential may ever be committed to the repository.**
-
-Target variables (`.env.example`):
+### 4. Demo Reset & State Initialization
+To initialize or restore the database to a clean, seeded baseline at any time:
 ```bash
-# Environment Configuration (Example)
-TRUEFORGE_API_KEY=your_trueforge_api_key_here
-LLM_API_KEY=your_llm_api_key_here
-DATABASE_URL=sqlite:///./hospital_ops.db
-ENVIRONMENT=development
-PORT=8000
+curl -X POST http://localhost:8000/api/demo/reset
 ```
 
 ---
 
-## Planned 5-Minute Demo Flow
+## Verification & Automated Tests
 
-1. **Trigger Incident:** The human operator opens the AIMBULENCE Live Operations Dashboard and clicks **"SIMULATE MASS CASUALTY"** (42 incoming casualties from highway transit collision).
-2. **Agent Detection & Assessment:** The AIMBULENCE agent receives the event payload and immediately queries the real connected database for current bed, surgical, and staffing capacity.
-3. **Runbook Selection & Shortage Math:** The agent matches the incident to Runbook `MCI-01`, executes deterministic shortage calculations in the sandbox, and identifies critical deficits (e.g., 30 bed deficit, 2 open OR deficit).
-4. **Autonomous Safe Execution (GREEN):** The agent automatically posts internal alert notices, stages the triage intake log, and verifies successful record creation.
-5. **The Checkpoint (RED):** The agent plans a consequential action: *Activate Emergency Disaster Protocol (Code Orange), divert non-urgent admissions, and clear recovery bays.* The agent halts execution at the TrueForge approval gate.
-6. **Human-in-the-Loop Decision:** The operator dashboard transitions into an urgent approval state showing:
-   - Specific action to execute
-   - Rationale and shortage data
-   - Affected hospital departments
-   - Risk assessment
-   - Operator actions: **[APPROVE]**, **[MODIFY]**, **[REJECT]**
-7. **Action Execution & Verification:** The operator clicks **APPROVE**. The agent resumes execution, commits the state change to the live database, queries the system to verify that the status changed to `CODE_ORANGE_ACTIVE`, and confirms surge capacity has been unlocked.
-8. **Dashboard & Audit Update:** The UI updates in real time, displaying the verified operational status and an immutable audit trail of all steps, approvals, and outcomes.
+AIMBULENCE is backed by a comprehensive automated test suite guaranteeing end-to-end reliability, security boundaries, and zero mock pollution:
 
----
+### Run Backend Tests (48/48 Passing)
+```powershell
+.\.venv\Scripts\pytest.exe backend/tests/ -v
+```
+*Covers: API contracts, MCP server tool discovery, TrueForge approval tokens, anti-replay exploits, process restart recovery, and full MCI-01 end-to-end runs.*
 
-## Safety & Data Ethics
-- **Synthetic Data Exclusively:** All hospital bed numbers, surgeon rosters, inventory counts, and casualty volumes are strictly synthetic. No Protected Health Information (PHI) or real hospital data is used.
-- **Strictly Non-Clinical:** The agent coordinates logistics, facilities, and staff mobilization. It never advises on patient care or medical decisions.
-- **Fail-Safe Operation:** If any tool call encounters an error or network partition, the agent fails safely: halts, alerts the human operator, and logs the exception.
+### Run Frontend Tests (142/142 Passing)
+```powershell
+cd frontend
+npm test -- --run
+```
+*Covers: Server action boundaries, console panels, TrueForge approval modal state, telemetry gauges, domain mappers, and zero-secret leaks.*
 
 ---
 
-## Development Status & Roadmap
+## 3–5 Minute Live Demo Sequence
 
-- **Phase 0 — Documentation & Governance (CURRENT)**
-- Phase 1 — Foundation & Repository Initialization *(Planned)*
-- Phase 2 — Real Operational Tool & Database Connection *(Planned)*
-- Phase 3 — Agent Harness & Runbook Engine *(Planned)*
-- Phase 4 — TrueForge Human Approval Checkpoints *(Planned)*
-- Phase 5 — Verification & State Auditing *(Planned)*
-- Phase 6 — UI Integration & Demo Hardening *(Planned)*
+Follow the complete step-by-step presentation script in [docs/demo_script.md](docs/demo_script.md):
+
+1. **Open Dashboard:** Navigate to `http://localhost:3000`. Point to live hospital telemetry (12 ED beds, 4 ICU beds, OR-3 in elective use).
+2. **Trigger Incident:** Click **"Trigger MCI-01 Runbook"** (Category 1 Mass Casualty — 42 inbound casualties).
+3. **Autonomous Execution:** Watch Steps 1–9 execute in seconds: triage area established, blood bank staged, shortages calculated.
+4. **The Intercept:** Step 10 requests commandeering active surgical suite `OR-3`. System automatically halts (`PAUSED_FOR_APPROVAL`). TrueForge modal appears. Show that `OR-3` is **not** mutated on disk.
+5. **Human Authorization:** Click **"Authorize & Commandeer OR-3"**. Token is verified and consumed, `OR-3` is converted, and Steps 11–15 complete with a 100% readiness score.
+6. **Rejection Demonstration:** Reset via `POST /api/demo/reset`. Run again and click **"Reject"**. Show runbook safely halts as `HALTED_REJECTED` with **zero database mutation**.
+
+---
+
+## Ethical Guardrails & Clinical Non-Goals
+
+AIMBULENCE is strictly an **operational logistics coordinator**, NOT a clinical practitioner:
+- ❌ **Zero Clinical Diagnosis:** Does not evaluate clinical symptoms or recommend medical diagnoses.
+- ❌ **Zero Medication Prescription:** Does not order drugs or prescribe dosages.
+- ❌ **Zero Patient Triage Grading:** Calculates facility-level bed deficits, not individual patient triage tags.
+- ❌ **Zero Protected Health Information (PHI):** Operates exclusively on synthetic hospital counts and facility IDs.
 
 ---
 
 ## AI Assistance Disclosure
-In accordance with the hackathon submission requirements, AI coding assistants (such as Antigravity / Google DeepMind agentic tools) are utilized during development for code generation, documentation structuring, and test creation. All generated architecture and logic are reviewed, validated, and tested by the team.
+
+In accordance with the hackathon submission guidelines, AI coding assistants (Google DeepMind Antigravity agentic pair programming tools) were utilized during engineering for code synthesis, test authoring, and documentation. All code, safety gates, and architectural patterns were designed, verified, and audited by the development team.
 
 ---
 
 ## Team
 
-- **Member 1:** AIMBULENCE Agent / Backend / Runbook Engine
-- **Member 2:** AIMBULENCE Frontend / UX / Operator Interface
+- **Member 1 (Team Lead):** AIMBULENCE Agent Core, FastAPI Backend, MCI-01 Runbook Engine, MCP Tool Layer, TrueForge Checkpoint Security, E2E Validation.
+- **Member 2:** AIMBULENCE Frontend Architecture, Next.js Control Center, UI Components, Server Actions, Testing.
 
 ---
 
 ## License
-This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the [MIT License](LICENSE).
