@@ -45,3 +45,153 @@ export async function triggerDocumentedMciAction(): Promise<CreateIncidentAction
     };
   }
 }
+
+export interface ApprovalActionResult {
+  readonly ok: boolean;
+  readonly message?: string;
+  readonly result?: import("@/types/api/contracts").DecideResponseWire;
+}
+
+/**
+ * Server action to submit human approval or denial for a TrueForge checkpoint.
+ *
+ * Strict governance:
+ * - Uses exact endpoint POST /api/approval/decide.
+ * - Operator identity is strictly required (min 2 chars).
+ * - Deliberate human submission only.
+ */
+export async function submitApprovalDecisionAction(
+  payload: import("@/types/api/contracts").DecideRequestWire,
+): Promise<ApprovalActionResult> {
+  const service = getOperationsService();
+  if (!service) {
+    return { ok: false, message: "Backend is not configured. Cannot submit approval decision." };
+  }
+
+  if (!payload.checkpoint_id) {
+    return { ok: false, message: "Invalid submission: Checkpoint ID is missing." };
+  }
+
+  if (!payload.decision_by || payload.decision_by.trim().length < 2) {
+    return {
+      ok: false,
+      message: "Human operator identification is required (minimum 2 characters).",
+    };
+  }
+
+  if (!["APPROVE", "REJECT", "allow", "deny"].includes(payload.decision)) {
+    return {
+      ok: false,
+      message: `Invalid decision '${payload.decision}'. Supported values are APPROVE or REJECT.`,
+    };
+  }
+
+  try {
+    const response = await service.decideApproval({
+      checkpoint_id: payload.checkpoint_id,
+      decision: payload.decision,
+      decision_by: payload.decision_by.trim(),
+      reason: payload.reason ? payload.reason.trim() : undefined,
+      execute_if_approved: payload.execute_if_approved ?? true,
+    });
+    revalidatePath("/");
+    return {
+      ok: true,
+      result: response,
+      message:
+        response.checkpoint.state === "REJECTED"
+          ? "Consequential action successfully rejected. Runbook blocked safely."
+          : "Consequential action authorized and executed.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to submit approval decision.",
+    };
+  }
+}
+
+export interface RunbookActionResult {
+  readonly ok: boolean;
+  readonly message?: string;
+  readonly execution?:
+    | import("@/types/api/contracts").StartRunbookResponseWire
+    | import("@/types/api/contracts").RunbookExecutionStateWire;
+}
+
+/**
+ * Server action to initiate the MCI-01 Mass Casualty Response Runbook.
+ */
+export async function startMciRunbookAction(
+  payload?: import("@/types/api/contracts").StartRunbookRequestWire,
+): Promise<RunbookActionResult> {
+  const service = getOperationsService();
+  if (!service) {
+    return { ok: false, message: "Backend is not configured. Cannot initiate runbook." };
+  }
+
+  try {
+    const res = await service.startMciRunbook(payload);
+    revalidatePath("/");
+    return {
+      ok: true,
+      execution: res,
+      message: res.message,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to start MCI runbook.",
+    };
+  }
+}
+
+/**
+ * Server action to resume a runbook paused at a TrueForge checkpoint.
+ */
+export async function resumeRunbookAction(
+  executionId: string,
+  reason?: string,
+): Promise<RunbookActionResult> {
+  const service = getOperationsService();
+  if (!service) {
+    return { ok: false, message: "Backend is not configured. Cannot resume runbook." };
+  }
+
+  try {
+    const res = await service.resumeRunbook(executionId, reason);
+    revalidatePath("/");
+    return {
+      ok: true,
+      execution: res,
+      message: `Runbook ${executionId} resumed. State: ${res.state}`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to resume runbook.",
+    };
+  }
+}
+
+/**
+ * Server action to fetch active checkpoints.
+ */
+export async function fetchCheckpointsAction(stateFilter?: string) {
+  const service = getOperationsService();
+  if (!service) {
+    return { ok: false, checkpoints: [], message: "Backend not configured." };
+  }
+
+  try {
+    const list = await service.listCheckpoints(stateFilter);
+    return { ok: true, checkpoints: list };
+  } catch (error) {
+    return {
+      ok: false,
+      checkpoints: [],
+      message: error instanceof Error ? error.message : "Failed to fetch checkpoints.",
+    };
+  }
+}
+

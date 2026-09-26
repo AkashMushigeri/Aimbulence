@@ -14,6 +14,10 @@ import { ApiConfigurationError, type ApiError } from "@/lib/errors";
 import { available, failed, loadSections, LOADING, type LoadRequest, type SectionState, type SectionStates } from "@/lib/loadState";
 import { getOperationsService, type BackendHealth } from "@/services/operations";
 import type { AuditEvent, HospitalCapacity, Incident, ResourceStatus } from "@/types/domain";
+import type {
+  RunbookExecutionStateWire,
+  TrueForgeApprovalCheckpointWire,
+} from "@/types/api/contracts";
 
 export const SECTION_KEYS = ["health", "hospital", "resources", "incidents", "audit"] as const;
 
@@ -28,6 +32,8 @@ export interface ConsoleData {
   readonly resources?: ResourceStatus;
   readonly incidents?: readonly Incident[];
   readonly audit?: readonly AuditEvent[];
+  readonly activeCheckpoint?: TrueForgeApprovalCheckpointWire | null;
+  readonly execution?: RunbookExecutionStateWire | null;
 }
 
 /** A not-configured backend is a first-class state, not an exception. */
@@ -44,6 +50,8 @@ function unconfigured(): ConsoleData {
       incidents: { label: "Incidents", state: failed(error) },
       audit: { label: "Audit trail", state: failed(error) },
     },
+    activeCheckpoint: null,
+    execution: null,
   };
 }
 
@@ -63,6 +71,18 @@ export async function loadConsoleData(): Promise<ConsoleData> {
 
   const sections = await loadSections(requests);
 
+  let activeCheckpoint: TrueForgeApprovalCheckpointWire | null = null;
+  let execution: RunbookExecutionStateWire | null = null;
+
+  try {
+    const checkpoints = await service.listCheckpoints("tool.approval_required").catch(() => []);
+    if (Array.isArray(checkpoints) && checkpoints.length > 0) {
+      activeCheckpoint = checkpoints[0] ?? null;
+    }
+  } catch {
+    // Non-fatal: if approval endpoints fail, retain main operational view
+  }
+
   return {
     configured: true,
     sections,
@@ -71,6 +91,8 @@ export async function loadConsoleData(): Promise<ConsoleData> {
     resources: pick(sections.resources),
     incidents: pick<readonly Incident[]>(sections.incidents),
     audit: pick<readonly AuditEvent[]>(sections.audit),
+    activeCheckpoint,
+    execution,
   };
 }
 
@@ -83,3 +105,4 @@ function pick<T>(section: SectionState | undefined): T | undefined {
 }
 
 export { LOADING };
+

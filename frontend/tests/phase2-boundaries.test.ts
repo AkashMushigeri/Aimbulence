@@ -50,8 +50,8 @@ function codeWithoutTypeImports(file: string): string {
 }
 
 describe("no undocumented backend endpoint is referenced", () => {
-  it("never references a planned Phase 3/4 endpoint outside its constant declaration", () => {
-    const planned = ["execute-runbook", "approval/decide"];
+  it("never references an undocumented endpoint outside its constant declaration", () => {
+    const planned = ["execute-runbook"];
 
     for (const file of [...serviceFiles, ...componentFiles, ...appApiFiles]) {
       const contents = code(file);
@@ -85,35 +85,42 @@ describe("no WebSocket or streaming implementation", () => {
   });
 });
 
-describe("no approval or runbook execution control", () => {
-  it("contains no state-mutation endpoint calls", () => {
+describe("controlled mutation boundaries", () => {
+  it("restricts state-mutation endpoint calls to documented operations", () => {
     for (const file of serviceFiles) {
       const contents = code(file);
-      // POST is permitted only for the documented incident-report operation.
       const postCalls = [...contents.matchAll(/method:\s*"POST"/g)];
       if (postCalls.length > 0) {
         expect(rel(file)).toBe("src/services/operations.ts");
         expect(contents).toContain("createIncident");
+        expect(contents).toContain("decideApproval");
+        expect(contents).toContain("startMciRunbook");
+        expect(contents).toContain("resumeRunbook");
       }
     }
   });
 
-  it("proxies no mutation route", () => {
+  it("proxies only documented mutation routes", () => {
     for (const file of appApiFiles.filter((path) => path.endsWith("route.ts"))) {
       const contents = code(file);
-      for (const verb of ["POST", "DELETE", "PUT", "PATCH"]) {
-        expect(contents, `${rel(file)} exports a ${verb} handler`).not.toMatch(
-          new RegExp(`export async function ${verb}\\b`),
-        );
+      const isMutationRoute =
+        file.includes("approval") || file.includes("runbooks") || file.includes("incidents");
+      if (!isMutationRoute) {
+        for (const verb of ["POST", "DELETE", "PUT", "PATCH"]) {
+          expect(contents, `${rel(file)} exports a ${verb} handler`).not.toMatch(
+            new RegExp(`export async function ${verb}\\b`),
+          );
+        }
       }
     }
   });
 
-  it("exposes no approval decision control in the UI", () => {
-    for (const file of componentFiles) {
+  it("exposes no approval decision controls in the read-only console panels", () => {
+    const consoleFiles = componentFiles.filter((file) =>
+      file.includes(`${join("src", "components", "console")}`),
+    );
+    for (const file of consoleFiles) {
       const contents = code(file);
-      // Descriptive safety-tier copy may legitimately mention the word
-      // "approval"; what must never appear is a decision control.
       for (const forbidden of [
         /onClick[^=]*=[^;]*(approve|reject|modify)/i,
         /["'`](APPROVE|MODIFY|REJECT)["'`]/,

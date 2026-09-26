@@ -19,6 +19,11 @@ import { DeficitPanel } from "./DeficitPanel";
 import { RunbookSection } from "./RunbookSection";
 import { AuditActivityPanel } from "./AuditActivityPanel";
 
+import type {
+  RunbookExecutionStateWire,
+  TrueForgeApprovalCheckpointWire,
+} from "@/types/api/contracts";
+
 export interface OperationsDashboardProps {
   readonly configured: boolean;
   readonly sections: SectionStates;
@@ -27,7 +32,8 @@ export interface OperationsDashboardProps {
   readonly resources?: ResourceStatus;
   readonly incidents?: readonly Incident[];
   readonly audit?: readonly AuditEvent[];
-  readonly execution?: AgentExecutionState | null;
+  readonly execution?: RunbookExecutionStateWire | null;
+  readonly activeCheckpoint?: TrueForgeApprovalCheckpointWire | null;
   readonly appName?: string;
   readonly appTagline?: string;
   readonly lastRefreshed?: string;
@@ -38,12 +44,14 @@ export function OperationsDashboard({
   sections,
   health,
   execution,
+  activeCheckpoint,
   appName = "AIMBULENCE",
   appTagline = "AI Emergency Hospital Operations Runbook Executor",
   lastRefreshed,
 }: OperationsDashboardProps) {
 
   const section = (key: SectionKey) => sections[key]?.state ?? { status: "loading" as const };
+
 
   const failureCount = Object.values(sections).filter(
     (entry) => entry.state.status === "failed",
@@ -102,10 +110,10 @@ export function OperationsDashboard({
             incidentsState={section("incidents")}
           />
 
-          {/* 6. RUNBOOK STATUS & VISUALIZER */}
-          <RunbookSection execution={execution} isConnected={isHealthAvailable} />
-
+          {/* 6. RUNBOOK STATUS / VISUALIZER */}
+          <RunbookSection execution={execution} activeCheckpoint={activeCheckpoint} />
         </div>
+
 
         {/* Right Column (Hospital Capacity, Resource Status, Audit Trail) - 5 cols on lg */}
         <div className="flex flex-col gap-5 lg:col-span-5">

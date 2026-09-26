@@ -46,6 +46,16 @@ export interface ApprovalProposal {
   /** Contract-supplied identifiers, once the Phase 4 endpoint exists. */
   readonly checkpointId?: string;
   readonly actionId?: string;
+  /** Backend-provided granular fields */
+  readonly actionType?: string;
+  readonly reason?: string;
+  readonly expectedBenefit?: string;
+  readonly potentialConsequence?: string;
+  readonly affectedResource?: string;
+  readonly currentStateDetails?: Readonly<Record<string, unknown>>;
+  readonly proposedStateDetails?: Readonly<Record<string, unknown>>;
+  readonly incidentId?: string | null;
+  readonly requiresHumanApproval?: boolean;
 }
 
 export interface ApprovalDecision {
@@ -58,3 +68,30 @@ export interface ApprovalDecision {
   /** Contract field: `operator_notes`. */
   readonly operatorNotes?: string;
 }
+
+export interface ConsequentialExecutionResult {
+  readonly status: string;
+  readonly checkpointId: string;
+  readonly actionId: string;
+  readonly resource: string;
+  readonly decision: string;
+  readonly authorizedBy: string;
+  readonly executedAt: string;
+  readonly previousState: Readonly<Record<string, unknown>>;
+  readonly newState: Readonly<Record<string, unknown>>;
+  readonly verification: Readonly<Record<string, unknown>>;
+  readonly auditRecorded: boolean;
+}
+
+export interface ResolvedCheckpointResult {
+  readonly status: string;
+  readonly checkpointId: string;
+  readonly state: string;
+  readonly decision: string;
+  readonly decisionBy?: string | null;
+  readonly reason?: string | null;
+  readonly executed: boolean;
+  readonly verified: boolean;
+  readonly execution?: ConsequentialExecutionResult | null;
+}
+
