@@ -1,5 +1,11 @@
 import type { BackendHealth } from "@/services/operations";
-import type { AuditEvent, HospitalCapacity, Incident, ResourceStatus } from "@/types/domain";
+import type {
+  AgentExecutionState,
+  AuditEvent,
+  HospitalCapacity,
+  Incident,
+  ResourceStatus,
+} from "@/types/domain";
 import type { SectionKey } from "@/lib/serverLoad";
 import type { SectionStates } from "@/lib/loadState";
 import type { ConnectionState } from "@/components/common";
@@ -21,6 +27,7 @@ export interface OperationsDashboardProps {
   readonly resources?: ResourceStatus;
   readonly incidents?: readonly Incident[];
   readonly audit?: readonly AuditEvent[];
+  readonly execution?: AgentExecutionState | null;
   readonly appName?: string;
   readonly appTagline?: string;
   readonly lastRefreshed?: string;
@@ -30,10 +37,12 @@ export function OperationsDashboard({
   configured,
   sections,
   health,
+  execution,
   appName = "AIMBULENCE",
   appTagline = "AI Emergency Hospital Operations Runbook Executor",
   lastRefreshed,
 }: OperationsDashboardProps) {
+
   const section = (key: SectionKey) => sections[key]?.state ?? { status: "loading" as const };
 
   const failureCount = Object.values(sections).filter(
@@ -93,8 +102,9 @@ export function OperationsDashboard({
             incidentsState={section("incidents")}
           />
 
-          {/* 6. RUNBOOK STATUS PLACEHOLDER */}
-          <RunbookSection />
+          {/* 6. RUNBOOK STATUS & VISUALIZER */}
+          <RunbookSection execution={execution} isConnected={isHealthAvailable} />
+
         </div>
 
         {/* Right Column (Hospital Capacity, Resource Status, Audit Trail) - 5 cols on lg */}

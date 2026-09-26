@@ -45,24 +45,28 @@ What exists and works:
 | Hospital Capacity Overview | Real aggregate capacity cards (ED, ICU, ORs, Staff, Depts) |
 | Detailed Resource Status | Tabbed physical/human inventory (theatres, staff, blood, fleet) |
 | Operational Deficits & Bottlenecks | Deterministic arithmetic (`BACKEND` vs `DERIVED` labeled) |
-| Runbook Status Area | Gated placeholder: `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` |
+| MCI-01 Runbook Visualizer | Complete 15-step orchestration viewer (`src/components/runbook/`) |
+| Runbook Progress & Status Badge | Live execution state machine (`PENDING`, `RUNNING`, `PAUSED`, `COMPLETED`, `FAILED`, `REJECTED`, `VERIFIED`, `ESCALATED`) |
+| Safety Checkpoint Governance | Enforces prominent `AGENT PAUSED · HUMAN AUTHORIZATION REQUIRED` at Steps 10–13 with zero fake auto-progression |
 | Audit & Activity Trail | Chronological immutable log; distinguishes `VERIFIED` from `SUCCESS` |
 | Connection & Error State | Isolated section boundaries, handles `CONNECTED`, `DEGRADED`, `DISCONNECTED` |
-| Unit & Integration tests | 120 passing across 13 suites |
+| Unit & Integration tests | 132 passing across 14 suites |
 
 Verified live against Member 1's running backend on `127.0.0.1:8000`.
 
 What is deliberately **not** built, and why:
 
-- **Approval checkpoint modal** — the approval engine and `/api/approval/decide`
-  do not exist. No `APPROVE` / `MODIFY` / `REJECT` control is rendered anywhere.
-  A control surface that could not be enforced by a backend is worse than none.
-- **Runbook execution engine calls** — `POST /api/agent/execute-runbook`
-  is `[PLANNED - PHASE 3]` and is not served. The UI prominently displays
-  `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` without simulating steps.
+- **Approval checkpoint decision action** — the live backend has not yet mounted
+  the decision execution route. No `APPROVE` / `MODIFY` / `REJECT` decision control
+  is exposed in the operator UI. The visualizer clearly halts and alerts `HUMAN AUTHORIZATION REQUIRED`.
+- **Live backend runbook execution trigger** — Member 1 implemented the runbook
+  engine in `origin/member-1` (`POST /api/runbooks/mci/start`), but this is not yet
+  running on the port 8000 backend instance. The trigger button is explicitly disabled
+  with clear operator messaging, preventing fake progress simulation.
 - **WebSocket / live streaming** — **no event contract exists.** The backend is
   REST-only. Data loads on server render and on explicit operator refresh.
-- **Consequential state mutations** — strictly deferred until Phase 4.
+- **Consequential state mutations** — strictly deferred until authorized by human supervisor.
+
 
 ---
 
@@ -334,7 +338,8 @@ Recorded so the claims here are auditable.
 | :--- | :--- |
 | `npm run lint` | No ESLint warnings or errors |
 | `npm run typecheck` | Clean (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`) |
-| `npm test` | 13 suites, 120/120 passing |
+| `npm test` | 14 suites, 132/132 passing |
+
 | `npm run build` | Compiled clean; dynamic routes, no warnings |
 
 **Live validation** against Member 1's real backend from `origin/member-1`
