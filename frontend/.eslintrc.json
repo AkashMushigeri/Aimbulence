@@ -1,0 +1,16 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "ignorePatterns": ["node_modules/", ".next/", "out/", "coverage/"],
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "eqeqeq": ["error", "always"]
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts", "tests/**/*.tsx"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}
