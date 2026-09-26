@@ -354,75 +354,112 @@
 
 ---
 
-## 3. Planned Endpoints (Phase 3 & Phase 4 Contracts)
+## 3. Human Approval & Runbook Endpoints `[IMPLEMENTED - PHASE 4 & 5]`
 
-> [!NOTE]
-> The endpoints below define the contract shapes for subsequent phases. Member 2 can scaffold UI state and mock responses against these exact signatures.
+### 3.1 Initiate MCI-01 Emergency Runbook `[IMPLEMENTED]`
 
----
-
-### 3.1 Trigger Agent Runbook Execution `[PLANNED - PHASE 3]`
-
-- **Endpoint:** `/api/agent/execute-runbook`
+- **Endpoint:** `/api/runbooks/mci/start`
 - **Method:** `POST`
-- **Status:** `[PLANNED - PHASE 3]`
-- **Description:** Triggers the TrueForge agent loop for a designated incident using runbook `MCI-01`.
+- **Status:** `[IMPLEMENTED]`
+- **Description:** Initiates the 15-step MCI-01 Mass Casualty Incident operational runbook. Automated steps execute sequentially until reaching the consequential Step 10 TrueForge checkpoint.
 
-#### Planned Request Body
+#### Request Body
 ```json
 {
-  "incident_id": "INC-7A8B9C0D",
-  "runbook_id": "MCI-01",
-  "auto_execute_green": true
+  "incident_id": "INC-MCI-42",
+  "incoming_casualties": 42,
+  "acute_ratio": 0.5
 }
 ```
 
-#### Planned Response (202 Accepted)
+#### Response (201 Created)
 ```json
 {
-  "execution_id": "RUN-9821ABCD",
-  "incident_id": "INC-7A8B9C0D",
+  "runbook_execution_id": "RBX-D736A471",
   "runbook_id": "MCI-01",
-  "status": "RUNNING",
-  "current_step": 3,
-  "total_steps": 15,
-  "active_checkpoint": null,
-  "started_at": "2026-09-26T12:06:00.000000Z"
+  "incident_id": "INC-MCI-42",
+  "state": "WAITING_FOR_APPROVAL",
+  "current_step": "MCI-01-10",
+  "checkpoint_id": "CHK-4E728E62",
+  "message": "Runbook initiated. Current state: WAITING_FOR_APPROVAL at step MCI-01-10."
 }
 ```
 
 ---
 
-### 3.2 Human Approval Checkpoint Decision `[PLANNED - PHASE 4]`
+### 3.2 Human Approval Checkpoint Decision `[IMPLEMENTED]`
 
 - **Endpoint:** `/api/approval/decide`
 - **Method:** `POST`
-- **Status:** `[PLANNED - PHASE 4]`
-- **Description:** Human operator submits authorization for a consequential (RED) action.
+- **Status:** `[IMPLEMENTED]`
+- **Description:** Human operator submits authorization (`allow` / `deny` / `APPROVE` / `REJECT`) for a consequential (RED) action.
 
-#### Planned Request Body
+#### Request Body
 ```json
 {
-  "checkpoint_id": "CHK-4491-RED",
-  "action_id": "ACT-DECLARE-CODE-ORANGE",
+  "checkpoint_id": "CHK-4E728E62",
   "decision": "APPROVE",
-  "operator_notes": "Surge confirmed; ICU and surgical teams paged."
+  "decision_by": "Dr. Eleanor Vance, Trauma Medical Director",
+  "reason": "Surge preemption authorized. Elective surgery safely postponed.",
+  "execute_if_approved": true
 }
 ```
 
-#### Decision Options
-- `APPROVE` — Authorizes agent to execute the consequential action and continue the runbook.
-- `MODIFY` — Authorizes execution with modified parameters.
-- `REJECT` — Halts action execution; agent adapts runbook and triggers contingency escalation.
-
-#### Planned Response (200 OK)
+#### Response (200 OK)
 ```json
 {
-  "checkpoint_id": "CHK-4491-RED",
-  "decision": "APPROVE",
-  "status": "EXECUTED",
-  "verified": true,
-  "resumed_runbook_step": 13,
-  "processed_at": "2026-09-26T12:07:30.000000Z"
+  "status": "DECIDED",
+  "checkpoint": {
+    "checkpoint_id": "CHK-4E728E62",
+    "state": "EXECUTED",
+    "token_consumed": true
+  },
+  "execution": {
+    "status": "SUCCESS",
+    "resource": "OR-3",
+    "decision": "APPROVED",
+    "authorized_by": "Dr. Eleanor Vance, Trauma Medical Director",
+    "verification": {
+      "verified": true,
+      "actual_value": "RESERVED_FOR_TRAUMA"
+    },
+    "audit_recorded": true
+  }
 }
 ```
+
+---
+
+### 3.3 Resume Paused Runbook `[IMPLEMENTED]`
+
+- **Endpoint:** `/api/runbooks/{execution_id}/resume`
+- **Method:** `POST`
+- **Status:** `[IMPLEMENTED]`
+- **Description:** Resumes a runbook paused at a TrueForge checkpoint once the human decision has been registered.
+
+#### Response (200 OK)
+```json
+{
+  "execution_id": "RBX-D736A471",
+  "runbook_id": "MCI-01",
+  "incident_id": "INC-MCI-42",
+  "state": "COMPLETED",
+  "completed_steps": ["MCI-01-01", "...", "MCI-01-15"],
+  "summary": {
+    "total_steps": 15,
+    "completed_steps": 15,
+    "preempted_operating_rooms": ["OR-3"]
+  }
+}
+```
+
+---
+
+### 3.4 Query Runbook State & History `[IMPLEMENTED]`
+
+- **Endpoints:**
+  - `GET /api/runbooks/{execution_id}` — Query specific execution state and completed step results.
+  - `GET /api/runbooks/latest` — Query the most recent execution (used by UI for state recovery on browser refresh).
+  - `GET /api/runbooks?limit=10` — List recent executions.
+- **Status:** `[IMPLEMENTED]`
+

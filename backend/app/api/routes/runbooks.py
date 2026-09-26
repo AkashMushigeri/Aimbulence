@@ -3,8 +3,8 @@
 Provides REST endpoints for starting, querying, and resuming the MCI-01
 operational runbook under TrueForge safety governance.
 """
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from backend.app.runbooks.engine import mci_engine
@@ -14,7 +14,7 @@ from backend.app.runbooks.models import (
     StartRunbookRequest,
     StartRunbookResponse,
 )
-from backend.app.services.database import get_db
+from backend.app.services.database import RunbookExecutionRecord, get_db
 from backend.app.tools.exceptions import (
     ResourceNotFoundError,
     StaleStateError,
@@ -22,6 +22,7 @@ from backend.app.tools.exceptions import (
 )
 
 router = APIRouter(prefix="/runbooks", tags=["Runbooks"])
+
 
 
 @router.post(
@@ -65,8 +66,51 @@ def start_mci_runbook(
         )
 
 
+
+@router.get(
+    "",
+    response_model=List[RunbookExecutionState],
+    summary="List recent runbook executions",
+)
+def list_runbook_executions(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    """List recent runbook executions from the persistent SQLite database."""
+    records = (
+        db.query(RunbookExecutionRecord)
+        .order_by(RunbookExecutionRecord.started_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [mci_engine.get_execution_state(execution_id=r.id, db=db) for r in records]
+
+
+@router.get(
+    "/latest",
+    response_model=Optional[RunbookExecutionState],
+    summary="Get the most recent runbook execution",
+)
+def get_latest_runbook_execution(
+    db: Session = Depends(get_db),
+):
+    """Retrieve the most recent runbook execution, allowing frontend clients to resume/reconnect on refresh."""
+    latest = (
+        db.query(RunbookExecutionRecord)
+        .order_by(RunbookExecutionRecord.started_at.desc())
+        .first()
+    )
+    if not latest:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No runbook executions found.",
+        )
+    return mci_engine.get_execution_state(execution_id=latest.id, db=db)
+
+
 @router.get(
     "/{execution_id}",
+
     response_model=RunbookExecutionState,
     summary="Retrieve runbook execution status and step history",
 )

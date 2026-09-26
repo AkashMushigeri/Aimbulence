@@ -448,3 +448,17 @@ def test_runbook_rest_api_endpoints(test_client):
     assert completed_data["state"] == "COMPLETED"
     assert len(completed_data["completed_steps"]) == 15
     assert completed_data["summary"] is not None
+
+    # 6. Test GET /api/runbooks/latest
+    latest_res = test_client.get("/api/runbooks/latest")
+    assert latest_res.status_code == 200
+    latest_data = latest_res.json()
+    assert latest_data["execution_id"] == execution_id
+
+    # 7. Test GET /api/runbooks list
+    list_res = test_client.get("/api/runbooks")
+    assert list_res.status_code == 200
+    list_data = list_res.json()
+    assert len(list_data) >= 1
+    assert any(item["execution_id"] == execution_id for item in list_data)
+

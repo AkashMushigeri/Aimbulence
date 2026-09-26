@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+coverage/
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+
+# Negate root .gitignore python lib/ rule for frontend source
+!src/lib/
+!src/lib/**
