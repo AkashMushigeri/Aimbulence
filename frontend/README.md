@@ -1,7 +1,7 @@
 # AIMBULENCE — Frontend (Member 2)
 
 > **Operator dashboard, approval checkpoint UI, and runbook visualizer**  
-> Phase 2 — Read-Only Backend Integration
+> Phase 3 — Live Operations Control Center
 
 This directory is owned exclusively by **Member 2** per `instruction.md` section 13.
 Member 1 owns `backend/`, the TrueForge integration, the approval engine, the
@@ -27,45 +27,42 @@ patient data. All operational figures are synthetic
 
 ---
 
-## 2. Current Status — Phase 2 (Read-Only Backend Integration)
+## 2. Current Status — Phase 3 (Live Operations Control Center)
 
 > [!IMPORTANT]
-> **Read-only.** The console retrieves real operational state from the running
-> backend. It performs no mutations and exposes no approval or execution control.
+> **Operational Dashboard.** The control center renders real operational state from
+> the running backend across 8 core dashboard areas. It provides deterministic
+> bottleneck computations and a controlled incident-dispatch intake action.
 
 What exists and works:
 
 | Area | State |
 | :--- | :--- |
 | Next.js + TypeScript + Tailwind project | Working, builds clean |
-| Operator console at `/` | Renders live health, capacity, resources, incidents, audit |
-| Domain type foundation | Complete, separated from transport types |
-| API transport types | Mirrored from Member 1's published contract |
-| Typed API client | Working, with timeouts and structured errors |
-| Read-only services | All six documented endpoints |
-| Response shape guards | Reject contract violations instead of half-populating |
-| Same-origin proxy routes | 5 relay routes, backend origin never reaches the browser |
-| Data hooks | 5 hooks with loading / success / error / retry |
-| Unit tests | 99 passing across 10 suites |
+| Live Operations Control Center at `/` | Full responsive operator dashboard (`src/components/dashboard/`) |
+| Top System Status Bar | Live health, backend connection status, refresh controls |
+| Incident Overview | Ingests real incidents from `GET /api/incidents` + controlled intake |
+| Hospital Capacity Overview | Real aggregate capacity cards (ED, ICU, ORs, Staff, Depts) |
+| Detailed Resource Status | Tabbed physical/human inventory (theatres, staff, blood, fleet) |
+| Operational Deficits & Bottlenecks | Deterministic arithmetic (`BACKEND` vs `DERIVED` labeled) |
+| Runbook Status Area | Gated placeholder: `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` |
+| Audit & Activity Trail | Chronological immutable log; distinguishes `VERIFIED` from `SUCCESS` |
+| Connection & Error State | Isolated section boundaries, handles `CONNECTED`, `DEGRADED`, `DISCONNECTED` |
+| Unit & Integration tests | 120 passing across 13 suites |
 
-Verified live against Member 1's running backend (`origin/member-1` @ `19a3f1d`)
-on both the dev server and the production build. See section 11.
+Verified live against Member 1's running backend on `127.0.0.1:8000`.
 
 What is deliberately **not** built, and why:
 
 - **Approval checkpoint modal** — the approval engine and `/api/approval/decide`
   do not exist. No `APPROVE` / `MODIFY` / `REJECT` control is rendered anywhere.
   A control surface that could not be enforced by a backend is worse than none.
-- **Runbook visualiser and execution controls** — `POST /api/agent/execute-runbook`
-  is `[PLANNED - PHASE 3]` and is not called.
+- **Runbook execution engine calls** — `POST /api/agent/execute-runbook`
+  is `[PLANNED - PHASE 3]` and is not served. The UI prominently displays
+  `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` without simulating steps.
 - **WebSocket / live streaming** — **no event contract exists.** The backend is
-  REST-only. Data loads on server render and on explicit operator retry. No
-  polling, SSE, or socket is implemented.
-- **Incident reporting UI** — `POST /api/incidents` is implemented as a typed,
-  tested service function but is **not** wired to any control, and no proxy
-  route forwards a mutation. Phase 2 is read-only.
-- **Full operator dashboard** — the console shows the documented read surface,
-  not the final Phase 6 dashboard.
+  REST-only. Data loads on server render and on explicit operator refresh.
+- **Consequential state mutations** — strictly deferred until Phase 4.
 
 ---
 
@@ -337,8 +334,8 @@ Recorded so the claims here are auditable.
 | :--- | :--- |
 | `npm run lint` | No ESLint warnings or errors |
 | `npm run typecheck` | Clean (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`) |
-| `npm test` | 10 suites, 99/99 passing |
-| `npm run build` | Compiled clean; 5 dynamic proxy routes, no warnings |
+| `npm test` | 13 suites, 120/120 passing |
+| `npm run build` | Compiled clean; dynamic routes, no warnings |
 
 **Live validation** against Member 1's real backend from `origin/member-1`
 (commit `19a3f1a`), run unmodified in a throwaway directory outside this

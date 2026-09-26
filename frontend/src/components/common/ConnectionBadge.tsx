@@ -3,7 +3,7 @@ import type { Loadable } from "@/lib/loadState";
 /**
  * The five connection states the operator console must be able to distinguish.
  */
-export type ConnectionState = "CONNECTED" | "DISCONNECTED" | "LOADING" | "AVAILABLE" | "FAILED";
+export type ConnectionState = "CONNECTED" | "DISCONNECTED" | "LOADING" | "AVAILABLE" | "FAILED" | "DEGRADED";
 
 export function connectionStateOf<T>(state: Loadable<T> | undefined): ConnectionState {
   if (!state || state.status === "loading") {
@@ -17,6 +17,7 @@ export function connectionStateOf<T>(state: Loadable<T> | undefined): Connection
 
 const STYLES: Record<ConnectionState, string> = {
   CONNECTED: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+  DEGRADED: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   DISCONNECTED: "border-slate-500/40 bg-slate-500/10 text-slate-300",
   LOADING: "border-sky-500/40 bg-sky-500/10 text-sky-300",
   AVAILABLE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
