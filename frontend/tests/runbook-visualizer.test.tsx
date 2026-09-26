@@ -116,7 +116,8 @@ describe("MCI-01 Runbook Visualizer & Execution Governance", () => {
 
   // 2. Unexecuted / standby state
   it("2. shows unexecuted state with disabled trigger button and NO fabricated progress bar", () => {
-    render(<RunbookSection />);
+    render(<RunbookVisualizer />);
+
 
     expect(screen.getByTestId("runbook-status-badge").textContent).toBe(
       "NOT CONNECTED / WAITING FOR EXECUTION ENGINE",

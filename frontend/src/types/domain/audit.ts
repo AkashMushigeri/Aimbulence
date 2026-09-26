@@ -12,19 +12,6 @@
  */
 import type { SafetyTier } from "./safety";
 
-export type VerificationState = "PENDING" | "VERIFIED" | "FAILED" | "NOT_VERIFIED";
-
-export interface VerificationResult {
-  readonly actionId: string;
-  readonly state: VerificationState;
-  /**
-   * Human-readable summary of what was re-queried and what the connected
-   * system actually returned. Required before `state` may become "VERIFIED".
-   */
-  readonly evidence?: string;
-  readonly verifiedAt?: string;
-}
-
 export const AUDIT_ACTORS = ["SYSTEM", "AGENT", "OPERATOR", "TOOL_LAYER", "DISPATCH_RECEIVER"] as const;
 
 export type AuditActor = (typeof AUDIT_ACTORS)[number] | (string & {});

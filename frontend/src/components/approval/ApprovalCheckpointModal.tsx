@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import type { DecideRequestWire, DecideResponseWire } from "@/types/api/contracts";
 import type { ApprovalProposal } from "@/types/domain";
+import { toActionResult, toVerificationResult } from "@/types/domain";
 import { submitApprovalDecisionAction } from "@/app/actions";
 import { ApprovalStatus, type ApprovalLifecycleState } from "./ApprovalStatus";
 import { ImpactBriefing } from "./ImpactBriefing";
 import { ApprovalProposalView } from "./ApprovalProposalView";
 import { DecisionControls } from "./DecisionControls";
+import { VerificationCard } from "@/components/verification";
 
 export interface ApprovalCheckpointModalProps {
   readonly isOpen: boolean;
@@ -144,12 +146,12 @@ export function ApprovalCheckpointModal({
           {isResolved && resolvedResult ? (
             <div
               data-testid="resolved-execution-details"
-              className="rounded-lg border border-surface-border bg-surface/60 p-4"
+              className="space-y-4 rounded-lg border border-surface-border bg-surface/60 p-4"
             >
               <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
                 Backend Checkpoint Resolution & Execution Result
               </h4>
-              <div className="mt-2 grid gap-2 text-xs font-mono text-slate-300 sm:grid-cols-2">
+              <div className="grid gap-2 text-xs font-mono text-slate-300 sm:grid-cols-2">
                 <div>
                   <span className="text-slate-500">Status:</span>{" "}
                   <strong className="text-white">{resolvedResult.status}</strong>
@@ -184,7 +186,31 @@ export function ApprovalCheckpointModal({
                 ) : null}
               </div>
 
-              <div className="mt-4 flex justify-end">
+              {resolvedResult.checkpoint.state === "REJECTED" && (
+                <div
+                  data-testid="rejection-safety-notice"
+                  className="rounded-lg border border-rose-500/60 bg-rose-950/30 p-3 text-xs text-rose-200"
+                >
+                  <p className="font-mono font-bold text-rose-300 uppercase">
+                    Safety Boundary Maintained
+                  </p>
+                  <p className="mt-1 text-slate-300">
+                    Consequential action was explicitly rejected. No tool calls were executed against SQLite, and no operational resources were altered.
+                  </p>
+                </div>
+              )}
+
+              {resolvedResult.execution?.verification && (() => {
+                const verif = toVerificationResult(resolvedResult.execution.verification);
+                const act = toActionResult(resolvedResult.execution);
+                return verif ? (
+                  <div className="pt-2">
+                    <VerificationCard action={act} verification={verif} />
+                  </div>
+                ) : null;
+              })()}
+
+              <div className="flex justify-end pt-2">
                 <button
                   type="button"
                   data-testid="resolved-close-btn"

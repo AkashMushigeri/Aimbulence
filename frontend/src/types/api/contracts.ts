@@ -359,7 +359,7 @@ export interface RunbookExecutionStateWire {
   readonly parameters?: Readonly<Record<string, unknown>>;
   readonly context?: Readonly<Record<string, unknown>>;
   readonly completed_steps?: readonly string[];
-  readonly step_results?: Readonly<Record<string, RunbookStepResultWire>>;
+  readonly step_results?: Readonly<Record<string, RunbookStepResultWire | Record<string, unknown>>>;
   readonly summary?: Readonly<Record<string, unknown>> | null;
   readonly error_message?: string | null;
   readonly started_at: string;
@@ -367,26 +367,9 @@ export interface RunbookExecutionStateWire {
   readonly completed_at?: string | null;
 }
 
-/* ------------------------------------------------------------------ */
-/* Phase 5 — MCI-01 Runbook Execution Engine           [IMPLEMENTED] */
-/* ------------------------------------------------------------------ */
+export type RunbookStateWire = RunbookWireState;
 
-export type RunbookStateWire =
-  | "PENDING"
-  | "RUNNING"
-  | "WAITING_FOR_APPROVAL"
-  | "COMPLETED"
-  | "FAILED"
-  | "BLOCKED";
-
-export type StepStatusWire =
-  | "PENDING"
-  | "RUNNING"
-  | "COMPLETED"
-  | "SKIPPED"
-  | "WAITING_FOR_APPROVAL"
-  | "FAILED"
-  | "BLOCKED";
+export type StepStatusWire = StepWireStatus;
 
 export interface StartRunbookRequestWire {
   readonly incident_id?: string;
@@ -402,38 +385,6 @@ export interface StartRunbookResponseWire {
   readonly current_step: string | null;
   readonly checkpoint_id: string | null;
   readonly message: string;
-}
-
-export interface RunbookStepResultWire {
-  readonly step_id: string;
-  readonly step_number: number;
-  readonly name: string;
-  readonly safety_category: SafetyTierWire;
-  readonly status: StepStatusWire;
-  readonly input_summary?: Readonly<Record<string, unknown>>;
-  readonly output?: Readonly<Record<string, unknown>>;
-  readonly verification?: Readonly<Record<string, unknown>> | null;
-  readonly error?: string | null;
-  readonly started_at: string;
-  readonly completed_at?: string | null;
-}
-
-export interface RunbookExecutionStateWire {
-  readonly execution_id: string;
-  readonly runbook_id: string;
-  readonly incident_id: string;
-  readonly state: RunbookStateWire;
-  readonly current_step_id?: string | null;
-  readonly checkpoint_id?: string | null;
-  readonly parameters: Readonly<Record<string, unknown>>;
-  readonly context: Readonly<Record<string, unknown>>;
-  readonly completed_steps: readonly string[];
-  readonly step_results: Readonly<Record<string, RunbookStepResultWire | Record<string, unknown>>>;
-  readonly summary?: Readonly<Record<string, unknown>> | null;
-  readonly error_message?: string | null;
-  readonly started_at: string;
-  readonly updated_at: string;
-  readonly completed_at?: string | null;
 }
 
 export interface ResumeRunbookRequestWire {
