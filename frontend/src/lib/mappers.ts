@@ -164,3 +164,80 @@ export function toAuditEvent(wire: AuditEventWire): AuditEvent {
     timestamp: required(wire.timestamp, "timestamp"),
   };
 }
+
+export function formatStateSummary(state: Readonly<Record<string, unknown>> | undefined): string {
+  if (!state || Object.keys(state).length === 0) {
+    return "NOT PROVIDED BY BACKEND";
+  }
+  return Object.entries(state)
+    .map(
+      ([k, v]) =>
+        `${k.replace(/_/g, " ")}: ${v === null ? "none" : typeof v === "object" ? JSON.stringify(v) : String(v)}`,
+    )
+    .join(" | ");
+}
+
+export function toApprovalProposal(
+  checkpoint: import("@/types/api/contracts").TrueForgeApprovalCheckpointWire,
+): import("@/types/domain").ApprovalProposal {
+  const p = checkpoint.proposal;
+  if (!p) {
+    throw new TypeError("Contract violation: checkpoint missing proposal object");
+  }
+
+  const currentSummary = formatStateSummary(p.current_state);
+  const proposedSummary = formatStateSummary(p.proposed_state);
+
+  return {
+    targetAction: p.action_type || p.action_id || "NOT PROVIDED BY BACKEND",
+    operationalRationale: p.reason || p.expected_benefit || "NOT PROVIDED BY BACKEND",
+    projectedImpact: p.potential_consequence || "NOT PROVIDED BY BACKEND",
+    affectedResources: p.affected_resource ? [p.affected_resource] : ["NOT PROVIDED BY BACKEND"],
+    currentState: currentSummary,
+    postActionState: proposedSummary,
+    tier: "RED",
+    availableDecisions: ["APPROVE", "REJECT"],
+    gateState: checkpoint.state === "tool.approval_required" ? "AWAITING_OPERATOR" : "NOT_BLOCKED",
+    checkpointId: checkpoint.checkpoint_id,
+    actionId: p.action_id,
+    actionType: p.action_type,
+    reason: p.reason,
+    expectedBenefit: p.expected_benefit,
+    potentialConsequence: p.potential_consequence,
+    affectedResource: p.affected_resource,
+    currentStateDetails: p.current_state,
+    proposedStateDetails: p.proposed_state,
+    incidentId: p.incident_id,
+    requiresHumanApproval: p.requires_human_approval ?? true,
+  };
+}
+
+export function toRunbookExecution(
+  wire: import("@/types/api/contracts").RunbookExecutionStateWire,
+): import("@/types/domain").AgentExecutionState {
+  const isAwaiting = wire.state === "WAITING_FOR_APPROVAL";
+  const stepNum = wire.current_step_id
+    ? parseInt(wire.current_step_id.replace(/^MCI-\d+-0*/, ""), 10) || 1
+    : 1;
+
+  return {
+    executionId: wire.execution_id,
+    incidentId: wire.incident_id,
+    runbookId: wire.runbook_id,
+    status: isAwaiting
+      ? "AWAITING_APPROVAL"
+      : wire.state === "COMPLETED"
+      ? "COMPLETED"
+      : wire.state === "BLOCKED"
+      ? "HALTED"
+      : wire.state === "FAILED"
+      ? "FAILED"
+      : "RUNNING",
+    currentStep: stepNum,
+    totalSteps: 15,
+    activeCheckpoint: wire.checkpoint_id ?? null,
+    gateState: isAwaiting ? "AWAITING_OPERATOR" : "NOT_BLOCKED",
+    startedAt: wire.started_at,
+  };
+}
+

@@ -225,10 +225,79 @@ export interface RunbookExecutionResponseWire {
 }
 
 /* ------------------------------------------------------------------ */
-/* Section 3.2 — POST /api/approval/decide        [PLANNED - PHASE 4]   */
-/* Not served. Declared so the approval UI can be typed later.             */
+/* Phase 4 — TrueForge Human Approval Checkpoints      [IMPLEMENTED] */
 /* ------------------------------------------------------------------ */
 
+export type CheckpointStateWire =
+  | "tool.approval_required"
+  | "APPROVED"
+  | "REJECTED"
+  | "EXECUTED"
+  | "FAILED";
+
+export type ApprovalDecisionTypeWire = "allow" | "deny" | "APPROVE" | "REJECT";
+
+export interface RedActionProposalWire {
+  readonly action_id: string;
+  readonly action_type: string;
+  readonly risk_level: string;
+  readonly safety_category: string;
+  readonly affected_resource: string;
+  readonly current_state: Readonly<Record<string, unknown>>;
+  readonly proposed_state: Readonly<Record<string, unknown>>;
+  readonly reason: string;
+  readonly expected_benefit: string;
+  readonly potential_consequence: string;
+  readonly requires_human_approval: boolean;
+  readonly incident_id?: string | null;
+  readonly created_at: string;
+}
+
+export interface TrueForgeApprovalCheckpointWire {
+  readonly checkpoint_id: string;
+  readonly thread_id: string;
+  readonly tool_call_id: string;
+  readonly proposal: RedActionProposalWire;
+  readonly state: CheckpointStateWire;
+  readonly authorization_token?: string | null;
+  readonly token_consumed: boolean;
+  readonly decision_by?: string | null;
+  readonly decision_reason?: string | null;
+  readonly created_at: string;
+  readonly resolved_at?: string | null;
+  readonly executed_at?: string | null;
+  readonly execution_result?: Readonly<Record<string, unknown>> | null;
+}
+
+export interface DecideRequestWire {
+  readonly checkpoint_id: string;
+  readonly decision: ApprovalDecisionTypeWire;
+  readonly decision_by: string;
+  readonly reason?: string | null;
+  readonly execute_if_approved?: boolean;
+}
+
+export interface ConsequentialExecutionResultWire {
+  readonly status: string;
+  readonly checkpoint_id: string;
+  readonly action_id: string;
+  readonly resource: string;
+  readonly decision: string;
+  readonly authorized_by: string;
+  readonly executed_at: string;
+  readonly previous_state: Readonly<Record<string, unknown>>;
+  readonly new_state: Readonly<Record<string, unknown>>;
+  readonly verification: Readonly<Record<string, unknown>>;
+  readonly audit_recorded: boolean;
+}
+
+export interface DecideResponseWire {
+  readonly status: string;
+  readonly checkpoint: TrueForgeApprovalCheckpointWire;
+  readonly execution: ConsequentialExecutionResultWire | null;
+}
+
+/* Backward-compatibility types for previous draft contracts */
 export type ApprovalDecisionWire = "APPROVE" | "MODIFY" | "REJECT";
 
 export interface ApprovalDecisionRequestWire {
@@ -245,6 +314,79 @@ export interface ApprovalDecisionResponseWire {
   readonly verified: boolean;
   readonly resumed_runbook_step: number;
   readonly processed_at: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* Phase 5 — MCI-01 Runbook Execution Engine           [IMPLEMENTED] */
+/* ------------------------------------------------------------------ */
+
+export type RunbookStateWire =
+  | "PENDING"
+  | "RUNNING"
+  | "WAITING_FOR_APPROVAL"
+  | "COMPLETED"
+  | "FAILED"
+  | "BLOCKED";
+
+export type StepStatusWire =
+  | "PENDING"
+  | "RUNNING"
+  | "COMPLETED"
+  | "SKIPPED"
+  | "WAITING_FOR_APPROVAL"
+  | "FAILED"
+  | "BLOCKED";
+
+export interface StartRunbookRequestWire {
+  readonly incident_id?: string;
+  readonly incoming_casualties?: number;
+  readonly acute_ratio?: number;
+}
+
+export interface StartRunbookResponseWire {
+  readonly runbook_execution_id: string;
+  readonly runbook_id: string;
+  readonly incident_id: string;
+  readonly state: RunbookStateWire;
+  readonly current_step: string | null;
+  readonly checkpoint_id: string | null;
+  readonly message: string;
+}
+
+export interface RunbookStepResultWire {
+  readonly step_id: string;
+  readonly step_number: number;
+  readonly name: string;
+  readonly safety_category: SafetyTierWire;
+  readonly status: StepStatusWire;
+  readonly input_summary?: Readonly<Record<string, unknown>>;
+  readonly output?: Readonly<Record<string, unknown>>;
+  readonly verification?: Readonly<Record<string, unknown>> | null;
+  readonly error?: string | null;
+  readonly started_at: string;
+  readonly completed_at?: string | null;
+}
+
+export interface RunbookExecutionStateWire {
+  readonly execution_id: string;
+  readonly runbook_id: string;
+  readonly incident_id: string;
+  readonly state: RunbookStateWire;
+  readonly current_step_id?: string | null;
+  readonly checkpoint_id?: string | null;
+  readonly parameters: Readonly<Record<string, unknown>>;
+  readonly context: Readonly<Record<string, unknown>>;
+  readonly completed_steps: readonly string[];
+  readonly step_results: Readonly<Record<string, RunbookStepResultWire | Record<string, unknown>>>;
+  readonly summary?: Readonly<Record<string, unknown>> | null;
+  readonly error_message?: string | null;
+  readonly started_at: string;
+  readonly updated_at: string;
+  readonly completed_at?: string | null;
+}
+
+export interface ResumeRunbookRequestWire {
+  readonly reason?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -267,8 +409,7 @@ export interface ApiValidationErrorWire {
 }
 
 /**
- * Endpoint path constants, transcribed verbatim from `docs/api_contract.md`.
- * Only `[IMPLEMENTED]` paths are safe to call today.
+ * Endpoint path constants, transcribed verbatim from backend routes and contracts.
  */
 export const API_PATHS = {
   HEALTH: "/api/health",
@@ -276,9 +417,14 @@ export const API_PATHS = {
   RESOURCES: "/api/resources",
   INCIDENTS: "/api/incidents",
   AUDIT_LOG: "/api/audit-log",
+  APPROVAL_DECIDE: "/api/approval/decide",
+  APPROVAL_CHECKPOINTS: "/api/approval/checkpoints",
+  RUNBOOKS_START_MCI: "/api/runbooks/mci/start",
+  RUNBOOKS_EXECUTION: (executionId: string) => `/api/runbooks/${executionId}`,
+  RUNBOOKS_RESUME: (executionId: string) => `/api/runbooks/${executionId}/resume`,
 } as const;
 
-/** Paths documented but not yet served by the backend. */
+/** Legacy / planned endpoint reference */
 export const PLANNED_API_PATHS = {
   EXECUTE_RUNBOOK: "/api/agent/execute-runbook",
   APPROVAL_DECIDE: "/api/approval/decide",

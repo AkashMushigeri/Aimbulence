@@ -24,11 +24,18 @@ import type { AuditEvent, HospitalCapacity, Incident, ResourceStatus } from "@/t
 import { API_PATHS } from "@/types/api/contracts";
 import type {
   AuditEventWire,
+  DecideRequestWire,
+  DecideResponseWire,
   HealthResponse,
   HospitalStatusWire,
   IncidentCreateWire,
   IncidentWire,
   ResourceStatusWire,
+  ResumeRunbookRequestWire,
+  RunbookExecutionStateWire,
+  StartRunbookRequestWire,
+  StartRunbookResponseWire,
+  TrueForgeApprovalCheckpointWire,
 } from "@/types/api/contracts";
 import { createApiClient, type ApiClient } from "./apiClient";
 
@@ -48,6 +55,12 @@ export interface OperationsService {
   getIncidents(signal?: AbortSignal): Promise<Incident[]>;
   createIncident(payload: IncidentCreateWire, signal?: AbortSignal): Promise<Incident>;
   getAuditLog(limit?: number, signal?: AbortSignal): Promise<AuditEvent[]>;
+  listCheckpoints(stateFilter?: string, signal?: AbortSignal): Promise<TrueForgeApprovalCheckpointWire[]>;
+  getCheckpoint(checkpointId: string, signal?: AbortSignal): Promise<TrueForgeApprovalCheckpointWire>;
+  decideApproval(payload: DecideRequestWire, signal?: AbortSignal): Promise<DecideResponseWire>;
+  startMciRunbook(payload?: StartRunbookRequestWire, signal?: AbortSignal): Promise<StartRunbookResponseWire>;
+  getRunbookExecution(executionId: string, signal?: AbortSignal): Promise<RunbookExecutionStateWire>;
+  resumeRunbook(executionId: string, reason?: string, signal?: AbortSignal): Promise<RunbookExecutionStateWire>;
 }
 
 /** `docs/api_contract.md` section 2.6: default 50, maximum 200. */
@@ -96,11 +109,6 @@ export function createOperationsService(client: ApiClient): OperationsService {
 
     /**
      * Reports a new incident.
-     *
-     * Documented and `[IMPLEMENTED]`, but intentionally NOT wired to any UI in
-     * Phase 2. Incident reporting is a state mutation, and Phase 2 is scoped to
-     * read-only integration. Exposing a mutation control now would exceed the
-     * phase boundary. Reserved for the Phase 6 operator console.
      */
     async createIncident(payload, signal) {
       const wire = await client.request<IncidentWire>(API_PATHS.INCIDENTS, {
@@ -128,6 +136,56 @@ export function createOperationsService(client: ApiClient): OperationsService {
       return rows.map((row) =>
         mapOrThrow(assertObject<AuditEventWire>(row, `${API_PATHS.AUDIT_LOG}[]`), toAuditEvent, API_PATHS.AUDIT_LOG),
       );
+    },
+
+    async listCheckpoints(stateFilter, signal) {
+      const query = stateFilter ? { state: stateFilter } : undefined;
+      const wire = await client.request<TrueForgeApprovalCheckpointWire[]>(API_PATHS.APPROVAL_CHECKPOINTS, {
+        query,
+        signal,
+      });
+      return assertArray<TrueForgeApprovalCheckpointWire>(wire, API_PATHS.APPROVAL_CHECKPOINTS);
+    },
+
+    async getCheckpoint(checkpointId, signal) {
+      const path = `${API_PATHS.APPROVAL_CHECKPOINTS}/${encodeURIComponent(checkpointId)}`;
+      const wire = await client.request<TrueForgeApprovalCheckpointWire>(path, { signal });
+      return assertObject<TrueForgeApprovalCheckpointWire>(wire, path);
+    },
+
+    async decideApproval(payload, signal) {
+      const wire = await client.request<DecideResponseWire>(API_PATHS.APPROVAL_DECIDE, {
+        method: "POST",
+        body: payload,
+        signal,
+      });
+      return assertObject<DecideResponseWire>(wire, API_PATHS.APPROVAL_DECIDE);
+    },
+
+    async startMciRunbook(payload, signal) {
+      const wire = await client.request<StartRunbookResponseWire>(API_PATHS.RUNBOOKS_START_MCI, {
+        method: "POST",
+        body: payload ?? {},
+        signal,
+      });
+      return assertObject<StartRunbookResponseWire>(wire, API_PATHS.RUNBOOKS_START_MCI);
+    },
+
+    async getRunbookExecution(executionId, signal) {
+      const path = API_PATHS.RUNBOOKS_EXECUTION(encodeURIComponent(executionId));
+      const wire = await client.request<RunbookExecutionStateWire>(path, { signal });
+      return assertObject<RunbookExecutionStateWire>(wire, path);
+    },
+
+    async resumeRunbook(executionId, reason, signal) {
+      const path = API_PATHS.RUNBOOKS_RESUME(encodeURIComponent(executionId));
+      const body: ResumeRunbookRequestWire = reason ? { reason } : {};
+      const wire = await client.request<RunbookExecutionStateWire>(path, {
+        method: "POST",
+        body,
+        signal,
+      });
+      return assertObject<RunbookExecutionStateWire>(wire, path);
     },
   };
 }

@@ -355,12 +355,108 @@ describe("invalid response shape rejection", () => {
 
 describe("endpoint path constants", () => {
   it("transcribes the documented paths verbatim", () => {
-    expect(API_PATHS).toEqual({
-      HEALTH: "/api/health",
-      HOSPITAL_STATUS: "/api/hospital/status",
-      RESOURCES: "/api/resources",
-      INCIDENTS: "/api/incidents",
-      AUDIT_LOG: "/api/audit-log",
+    expect(API_PATHS.HEALTH).toBe("/api/health");
+    expect(API_PATHS.HOSPITAL_STATUS).toBe("/api/hospital/status");
+    expect(API_PATHS.RESOURCES).toBe("/api/resources");
+    expect(API_PATHS.INCIDENTS).toBe("/api/incidents");
+    expect(API_PATHS.AUDIT_LOG).toBe("/api/audit-log");
+    expect(API_PATHS.APPROVAL_DECIDE).toBe("/api/approval/decide");
+    expect(API_PATHS.APPROVAL_CHECKPOINTS).toBe("/api/approval/checkpoints");
+    expect(API_PATHS.RUNBOOKS_START_MCI).toBe("/api/runbooks/mci/start");
+    expect(API_PATHS.RUNBOOKS_EXECUTION("RBX-123")).toBe("/api/runbooks/RBX-123");
+    expect(API_PATHS.RUNBOOKS_RESUME("RBX-123")).toBe("/api/runbooks/RBX-123/resume");
+  });
+});
+
+describe("Phase 4 & 5 approval and runbook services", () => {
+  const MOCK_CHECKPOINT = {
+    checkpoint_id: "CHK-4E728E62",
+    thread_id: "thread-mci-42",
+    tool_call_id: "call-123",
+    proposal: {
+      action_id: "ACT-PREEMPT-OR3",
+      action_type: "PREEMPT_OPERATING_ROOM",
+      risk_level: "RED",
+      safety_category: "RED",
+      affected_resource: "OR-3",
+      current_state: { status: "IN_USE", scheduled_procedure: "Knee Debridement" },
+      proposed_state: { status: "RESERVED_FOR_TRAUMA", is_emergency_cleared: true },
+      reason: "MCI surge requires trauma surgical capacity.",
+      expected_benefit: "Unlocks trauma surgical suite OR-3.",
+      potential_consequence: "Elective orthopedic procedure postponed.",
+      requires_human_approval: true,
+      incident_id: "INC-MCI-42",
+      created_at: "2026-09-26T12:00:00Z",
+    },
+    state: "tool.approval_required",
+    token_consumed: false,
+    created_at: "2026-09-26T12:00:00Z",
+  };
+
+  it("lists active checkpoints with optional state filter", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse([MOCK_CHECKPOINT]));
+    const service = serviceWith(fetchMock);
+
+    const list = await service.listCheckpoints("tool.approval_required");
+    expect(list).toHaveLength(1);
+    expect(list[0]?.checkpoint_id).toBe("CHK-4E728E62");
+    expect(fetchMock.mock.calls[0]?.[0]).toContain("/api/approval/checkpoints?state=tool.approval_required");
+  });
+
+  it("submits an authorization decision with execute_if_approved", async () => {
+    const decideResponse = {
+      status: "DECIDED",
+      checkpoint: { ...MOCK_CHECKPOINT, state: "EXECUTED" },
+      execution: {
+        status: "SUCCESS",
+        checkpoint_id: "CHK-4E728E62",
+        action_id: "ACT-PREEMPT-OR3",
+        resource: "OR-3",
+        decision: "APPROVED",
+        authorized_by: "Dr. Eleanor Vance",
+        executed_at: "2026-09-26T12:05:00Z",
+        previous_state: { status: "IN_USE" },
+        new_state: { status: "RESERVED_FOR_TRAUMA", is_emergency_cleared: true },
+        verification: { verified: true, actual_value: "RESERVED_FOR_TRAUMA" },
+        audit_recorded: true,
+      },
+    };
+
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(decideResponse));
+    const service = serviceWith(fetchMock);
+
+    const result = await service.decideApproval({
+      checkpoint_id: "CHK-4E728E62",
+      decision: "APPROVE",
+      decision_by: "Dr. Eleanor Vance",
+      reason: "Surge preemption authorized",
+      execute_if_approved: true,
     });
+
+    expect(result.status).toBe("DECIDED");
+    expect(result.checkpoint.state).toBe("EXECUTED");
+    expect(result.execution?.verification).toEqual({ verified: true, actual_value: "RESERVED_FOR_TRAUMA" });
+  });
+
+  it("initiates MCI-01 runbook and resumes after resolution", async () => {
+    const startResponse = {
+      runbook_execution_id: "RBX-D736A471",
+      runbook_id: "MCI-01",
+      incident_id: "INC-MCI-42",
+      state: "WAITING_FOR_APPROVAL",
+      current_step: "MCI-01-10",
+      checkpoint_id: "CHK-4E728E62",
+      message: "Runbook initiated.",
+    };
+
+    const startMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(startResponse));
+    const service = serviceWith(startMock);
+
+    const started = await service.startMciRunbook({
+      incident_id: "INC-MCI-42",
+      incoming_casualties: 42,
+    });
+    expect(started.runbook_execution_id).toBe("RBX-D736A471");
+    expect(started.state).toBe("WAITING_FOR_APPROVAL");
   });
 });
