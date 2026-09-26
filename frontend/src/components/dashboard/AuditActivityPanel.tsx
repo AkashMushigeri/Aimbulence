@@ -84,10 +84,10 @@ export function determineLifecyclePhase(event: AuditEvent): AuditLifecyclePhase 
 }
 
 const RESULT_STYLES: Record<AuditEventResultStatus, string> = {
-  VERIFIED: "border-emerald-500/60 bg-emerald-500/20 text-emerald-200 font-bold",
-  SUCCESS: "border-sky-500/40 bg-sky-500/10 text-sky-300",
-  PENDING: "border-amber-500/50 bg-amber-500/15 text-amber-300",
-  ERROR: "border-red-500/60 bg-red-500/20 text-red-200 font-bold",
+  VERIFIED: "border-emerald-300 bg-emerald-50 text-emerald-800 font-extrabold",
+  SUCCESS: "border-sky-300 bg-sky-50 text-sky-800 font-bold",
+  PENDING: "border-amber-300 bg-amber-50 text-amber-800 font-bold",
+  ERROR: "border-red-300 bg-red-50 text-red-800 font-extrabold",
 };
 
 export interface AuditActivityPanelProps {
@@ -113,7 +113,7 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
       {state.status === "failed" ? (
         <div className="space-y-3">
           <ErrorNotice error={state.error} title="Audit trail unavailable" />
-          <p className="text-xs text-slate-400">
+          <p className="text-xs sm:text-sm text-stone-600">
             Backend audit records cannot be loaded. No records are fabricated.
           </p>
         </div>
@@ -121,17 +121,17 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
 
       {state.status === "available" && events.length === 0 ? (
         <EmptyState title="No Audit Records Returned">
-          <p className="text-slate-400">The operational backend reported an empty audit log.</p>
+          <p className="text-stone-600 text-xs sm:text-sm">The operational backend reported an empty audit log.</p>
         </EmptyState>
       ) : null}
 
       {state.status === "available" && events.length > 0 ? (
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs sm:text-[13px] text-stone-600">
             <span className="font-mono">
-              Total Records: <strong className="text-slate-200">{events.length}</strong> (chronological order)
+              Total Records: <strong className="text-stone-900 font-bold">{events.length}</strong> (chronological order)
             </span>
-            <div className="hidden font-mono text-[10px] text-slate-500 md:block">
+            <div className="hidden font-mono text-xs text-stone-500 md:block font-semibold">
               RUNBOOK STEP → ACTION → APPROVAL → EXECUTION → VERIFICATION → AUDIT
             </div>
           </div>
@@ -181,34 +181,35 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
                 <li
                   key={event.id}
                   data-testid={`audit-event-${event.id}`}
-                  className="rounded-lg border border-surface-border bg-surface/50 p-3.5 transition-colors hover:border-slate-600"
+                  className="rounded-2xl border border-[#e5dfd2] bg-[#fffdf9] p-4 sm:p-5 transition-colors hover:border-[#d8d0c0] shadow-xs"
                 >
-                  {/* Event Header with Sequence Phase */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-border/40 pb-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ece5d8] pb-3">
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Lifecycle Sequence Pill */}
                       <span
                         data-testid={`audit-phase-${event.id}`}
-                        className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
                           phase === "VERIFICATION"
-                            ? "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
                             : phase === "APPROVAL"
-                            ? "bg-red-950 text-red-300 border border-red-500/40"
+                            ? "bg-red-50 text-red-800 border border-red-300"
                             : phase === "EXECUTION"
-                            ? "bg-amber-950 text-amber-300 border border-amber-500/40"
+                            ? "bg-amber-50 text-amber-800 border border-amber-300"
                             : phase === "RUNBOOK_STEP"
-                            ? "bg-blue-950 text-blue-300 border border-blue-500/40"
-                            : "bg-slate-800 text-slate-300"
+                            ? "bg-sky-50 text-sky-800 border border-sky-300"
+                            : "bg-[#f4efe4] text-stone-700 border border-[#e5dfd2]"
                         }`}
                       >
+                        {phase === "VERIFICATION" && <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />}
+                        {phase === "APPROVAL" && <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />}
                         {phase.replace(/_/g, " ")}
                       </span>
 
-                      <span className="font-mono text-xs font-bold text-slate-100">{event.eventType}</span>
+                      <span className="font-mono text-xs sm:text-sm font-bold text-stone-900">{event.eventType}</span>
                       {event.tier ? <SafetyTierBadge tier={event.tier} /> : null}
                       <span
                         data-testid={`audit-status-${event.id}`}
-                        className={`rounded border px-1.5 py-0.2 font-mono text-[10px] uppercase tracking-wide ${
+                        className={`rounded border px-2.5 py-0.5 font-mono text-xs uppercase font-extrabold tracking-wide ${
                           RESULT_STYLES[status]
                         }`}
                       >
@@ -216,38 +217,38 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
                       </span>
                     </div>
 
-                    <div className="font-mono text-[11px] text-slate-400">
-                      {formatRelativeAge(event.timestamp)} · <span className="text-slate-500">{event.timestamp}</span>
+                    <div className="font-mono text-xs text-stone-600 font-medium">
+                      {formatRelativeAge(event.timestamp)} · <span className="text-stone-500">{event.timestamp}</span>
                     </div>
                   </div>
 
                   {/* Operational Context Line */}
-                  <div className="mt-2 grid gap-1.5 text-xs text-slate-300 sm:grid-cols-2">
-                    <div>
-                      <span className="text-slate-500">Action/Tool: </span>
-                      <span className="font-mono font-medium text-slate-200">
+                  <div className="mt-3 grid gap-2.5 text-xs sm:text-[13px] text-stone-800 sm:grid-cols-2">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-stone-600 font-mono text-xs font-semibold">Action/Tool: </span>
+                      <span className="font-mono font-bold text-sky-800">
                         {actionTool ?? "Direct Log Entry"}
                       </span>
                     </div>
 
-                    <div className="font-mono text-slate-400">
-                      Actor: <span className="text-slate-200">{event.performedBy}</span>
+                    <div className="font-mono text-stone-600">
+                      Actor: <span className="text-stone-900 font-bold">{event.performedBy}</span>
                       {event.incidentId ? (
-                        <span className="ml-2 text-sky-400">({event.incidentId})</span>
+                        <span className="ml-2 font-mono text-sky-700 font-semibold">({event.incidentId})</span>
                       ) : null}
                     </div>
 
                     {runbookId || step ? (
-                      <div className="font-mono text-[11px] text-slate-400">
-                        Runbook: <strong className="text-slate-200">{runbookId ?? "MCI-01"}</strong>
-                        {step ? <span className="ml-1 text-slate-300">({step})</span> : null}
+                      <div className="font-mono text-xs text-stone-600">
+                        Runbook: <strong className="text-stone-900 font-bold">{runbookId ?? "MCI-01"}</strong>
+                        {step ? <span className="ml-1 text-stone-700 font-medium">({step})</span> : null}
                       </div>
                     ) : null}
 
                     {details.affected_resource || details.entity_id ? (
-                      <div className="font-mono text-[11px] text-slate-400">
+                      <div className="font-mono text-xs text-stone-600">
                         Target Resource:{" "}
-                        <strong className="text-amber-300">
+                        <strong className="text-amber-800 font-bold">
                           {String(details.affected_resource ?? details.entity_id)}
                         </strong>
                       </div>
@@ -256,19 +257,25 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
 
                   {/* Decision or Approval Details */}
                   {approvalDecision ? (
-                    <div className="mt-2 rounded bg-red-950/20 px-2.5 py-1 text-xs text-red-200 border border-red-500/30 font-mono">
-                      {approvalDecision}
-                      {details.reason ? <span className="ml-1 text-slate-300">— {String(details.reason)}</span> : null}
+                    <div className="mt-3 rounded-xl bg-red-50/80 px-3.5 py-2 text-xs sm:text-[13px] text-red-950 border border-red-300 font-mono shadow-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-red-900">
+                        <span className="h-2 w-2 rounded-full bg-red-600" />
+                        <span>{approvalDecision}</span>
+                      </div>
+                      {details.reason ? <div className="mt-1 text-stone-700 text-xs pl-3.5">Rationale: {String(details.reason)}</div> : null}
                     </div>
                   ) : null}
 
                   {/* Verification Outcome */}
                   {verificationSummary ? (
-                    <div className="mt-1.5 flex items-center gap-2 rounded bg-emerald-950/20 px-2.5 py-1 text-xs text-emerald-200 border border-emerald-500/30 font-mono">
-                      <span className="text-[10px] uppercase font-bold text-emerald-400">Verified Evidence:</span>
-                      <span>{verificationSummary}</span>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50/80 px-3.5 py-2 text-xs sm:text-[13px] text-emerald-950 border border-emerald-300 font-mono shadow-xs">
+                      <span className="inline-flex items-center gap-1 text-xs uppercase font-extrabold text-emerald-900">
+                        <span className="h-2 w-2 rounded-full bg-emerald-600" />
+                        Verified Evidence:
+                      </span>
+                      <span className="font-bold text-emerald-900">{verificationSummary}</span>
                       {details.actual_value !== undefined ? (
-                        <span className="text-slate-400">
+                        <span className="text-stone-600 text-xs">
                           (disk: {String(details.actual_value)})
                         </span>
                       ) : null}
@@ -277,21 +284,21 @@ export function AuditActivityPanel({ state }: AuditActivityPanelProps) {
 
                   {/* Escalation Callout */}
                   {escalation ? (
-                    <div className="mt-2 rounded border border-purple-500/40 bg-purple-950/30 px-2.5 py-1 font-mono text-xs font-bold text-purple-200">
+                    <div className="mt-2.5 rounded-xl border border-purple-300 bg-purple-50 px-3.5 py-2 font-mono text-xs sm:text-[13px] font-bold text-purple-900 shadow-xs">
                       ⚠ {escalation}
                     </div>
                   ) : null}
 
                   {/* Error Callout */}
                   {errorMessage ? (
-                    <p className="mt-2 rounded border border-red-500/30 bg-red-500/10 px-2.5 py-1 font-mono text-xs text-red-300">
+                    <p className="mt-2.5 rounded-xl border border-red-300 bg-red-50 px-3.5 py-2 font-mono text-xs sm:text-[13px] font-bold text-red-800">
                       Error: {errorMessage}
                     </p>
                   ) : null}
 
                   {/* Generic message if not error */}
                   {details.message && typeof details.message === "string" && !errorMessage ? (
-                    <p className="mt-1.5 text-xs text-slate-400">{details.message}</p>
+                    <p className="mt-2 text-xs sm:text-[13px] text-stone-600 font-medium">{details.message}</p>
                   ) : null}
                 </li>
               );

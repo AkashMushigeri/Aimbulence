@@ -21,12 +21,12 @@ export function ConnectionStateAlert({
 }: ConnectionStateAlertProps) {
   if (!configured) {
     return (
-      <div data-testid="backend-unconfigured" className="rounded-lg border border-slate-700 bg-surface-raised p-5">
-        <h2 className="font-mono text-base font-semibold text-slate-200">Backend Not Configured</h2>
-        <p className="mt-2 text-sm text-slate-400">
-          The AIMBULENCE control center requires a live operational backend. Set <code className="font-mono text-xs text-sky-300">BACKEND_BASE_URL</code> (or <code className="font-mono text-xs text-sky-300">BACKEND_HOST</code> + <code className="font-mono text-xs text-sky-300">BACKEND_PORT</code>) to connect.
+      <div data-testid="backend-unconfigured" className="rounded-2xl border border-amber-300 bg-amber-50/80 p-6 shadow-xs">
+        <h2 className="font-mono text-base sm:text-lg font-bold text-stone-900">Backend Not Configured</h2>
+        <p className="mt-2 text-sm text-stone-700">
+          The AIMBULENCE control center requires a live operational backend. Set <code className="font-mono text-xs text-amber-900 font-bold bg-[#ede7dc] px-2 py-0.5 rounded border border-[#d8d0c0]">BACKEND_BASE_URL</code> (or <code className="font-mono text-xs text-amber-900 font-bold bg-[#ede7dc] px-2 py-0.5 rounded border border-[#d8d0c0]">BACKEND_HOST</code> + <code className="font-mono text-xs text-amber-900 font-bold bg-[#ede7dc] px-2 py-0.5 rounded border border-[#d8d0c0]">BACKEND_PORT</code>) to connect.
         </p>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs sm:text-[13px] text-stone-600 font-medium">
           No synthetic fallback data is substituted. Unverified numbers are never presented as operational fact.
         </p>
       </div>
@@ -40,14 +40,14 @@ export function ConnectionStateAlert({
           title="Backend Disconnected / Unreachable"
           description="None of the documented operational endpoints could be reached."
         >
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-stone-700 font-medium">
             The control center is active, but the AIMBULENCE operational backend failed to respond. All capacity, inventory, and incident figures are withheld to prevent misinforming emergency operators.
           </p>
-          <ul className="mt-3 space-y-1 text-sm text-slate-400">
+          <ul className="mt-3 space-y-1.5 text-sm text-stone-700">
             {Object.entries(sections).map(([key, entry]) => (
               <li key={key}>
-                <span className="font-mono text-xs uppercase text-slate-500">{entry.label}</span> —{" "}
-                {describeError(entry.state.status === "failed" ? entry.state.error : null)}
+                <span className="font-mono text-xs uppercase text-stone-500 font-bold">{entry.label}</span> —{" "}
+                <span className="text-stone-800 font-medium">{describeError(entry.state.status === "failed" ? entry.state.error : null)}</span>
               </li>
             ))}
           </ul>
@@ -64,12 +64,12 @@ export function ConnectionStateAlert({
       <div
         data-testid="partial-failure-alert"
         role="alert"
-        className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200"
+        className="rounded-2xl border border-amber-300 bg-amber-50/90 p-5 text-sm text-stone-800 shadow-xs"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="font-semibold uppercase tracking-wider text-amber-300">DEGRADED OPERATIONAL STATE: </span>
-            <span>
+            <span className="font-bold uppercase tracking-wider text-amber-900">DEGRADED OPERATIONAL STATE: </span>
+            <span className="text-stone-700 font-medium">
               {availableCount} of {totalSections} endpoints responded. Affected sections display individual error boundaries with figures withheld.
             </span>
           </div>

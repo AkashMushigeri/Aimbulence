@@ -11,21 +11,21 @@ export function VerificationStatus({ status, className = "" }: VerificationStatu
       case "VERIFIED":
         return {
           label: "STATE VERIFIED ON DISK",
-          classes: "border-emerald-500/60 bg-emerald-500/20 text-emerald-200 font-extrabold",
-          dot: "bg-emerald-400",
+          classes: "border-emerald-300 bg-emerald-50 text-emerald-900 font-extrabold",
+          dot: "bg-emerald-600",
         };
       case "FAILED":
         return {
           label: "VERIFICATION FAILED (STATE MISMATCH)",
-          classes: "border-rose-500/60 bg-rose-500/20 text-rose-200 font-extrabold",
-          dot: "bg-rose-400",
+          classes: "border-rose-300 bg-rose-50 text-rose-900 font-extrabold",
+          dot: "bg-rose-600",
         };
       case "PENDING":
       default:
         return {
           label: "VERIFICATION PENDING",
-          classes: "border-amber-500/50 bg-amber-500/15 text-amber-300 font-semibold",
-          dot: "bg-amber-400",
+          classes: "border-amber-300 bg-amber-50 text-amber-900 font-bold",
+          dot: "bg-amber-600",
         };
     }
   };
@@ -36,9 +36,9 @@ export function VerificationStatus({ status, className = "" }: VerificationStatu
     <span
       data-testid="verification-status-badge"
       data-verification-status={status}
-      className={`inline-flex items-center gap-1.5 rounded border px-2.5 py-1 font-mono text-xs uppercase tracking-wide ${classes} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-xs uppercase tracking-wide shadow-xs ${classes} ${className}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      <span className={`h-2 w-2 rounded-full ${dot}`} />
       <span>{label}</span>
     </span>
   );

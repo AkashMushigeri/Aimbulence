@@ -82,7 +82,7 @@ export function RunbookVisualizer({
         !execution || (!isStarted && !isConnected) ? (
           <span
             data-testid="runbook-status-badge"
-            className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wide text-amber-300"
+            className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 font-mono text-xs uppercase tracking-wide text-amber-800 font-bold shadow-xs"
           >
             NOT CONNECTED / WAITING FOR EXECUTION ENGINE
           </span>
@@ -93,21 +93,21 @@ export function RunbookVisualizer({
         )
       }
     >
-      <div className="space-y-4 rounded-lg border border-dashed border-surface-border bg-surface/30 p-4">
+      <div className="space-y-4 rounded-2xl border border-[#e5dfd2] bg-[#fffdf9] p-5 sm:p-6 shadow-xs">
         {/* Header information */}
-        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-surface-border/50 pb-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-[#ece5d8] pb-3.5">
           <div>
-            <span className="text-xs uppercase tracking-wider text-slate-400">Target Runbook</span>
-            <p data-testid="runbook-id" className="font-mono text-base font-bold text-slate-100">
+            <span className="font-mono text-xs uppercase font-bold tracking-wider text-stone-600">Target Runbook</span>
+            <p data-testid="runbook-id" className="font-mono text-base sm:text-lg font-extrabold text-stone-900">
               MCI-01 — Mass-Casualty Response Runbook
             </p>
           </div>
           <div className="text-right">
-            <span className="text-xs uppercase tracking-wider text-slate-400">Engine State</span>
+            <span className="font-mono text-xs uppercase font-bold tracking-wider text-stone-600">Engine State</span>
             <p
               data-testid="runbook-engine-state"
-              className={`font-mono text-xs font-semibold ${
-                isStarted ? "text-blue-300" : "text-amber-300"
+              className={`font-mono text-xs sm:text-sm font-black ${
+                isStarted ? "text-sky-800" : "text-amber-800"
               }`}
             >
               {!execution || !isStarted
@@ -118,12 +118,12 @@ export function RunbookVisualizer({
         </div>
 
         {/* Execution trigger notice and disabled control */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface-elevated/40 p-3 border border-surface-border/60">
-          <div className="text-xs text-slate-400 max-w-xl">
-            <p className="font-semibold text-slate-300">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#fbf9f4] p-4 border border-[#e5dfd2] shadow-xs">
+          <div className="text-xs sm:text-[13px] text-stone-700 max-w-xl font-medium">
+            <p className="font-bold text-stone-900 font-mono">
               Deterministic Procedure Execution
             </p>
-            <p className="mt-0.5 text-[11px] text-slate-400">
+            <p className="mt-0.5 text-stone-600">
               Backend execution engine endpoint is pending backend deployment. Execution trigger is
               safely locked until runtime connection is verified.
             </p>
@@ -133,7 +133,7 @@ export function RunbookVisualizer({
             disabled
             data-testid="runbook-execute-btn"
             aria-disabled="true"
-            className="cursor-not-allowed rounded bg-slate-800 px-3.5 py-1.5 font-mono text-xs font-bold text-slate-400 border border-slate-700 opacity-60"
+            className="cursor-not-allowed rounded-xl bg-[#ede7dc] px-4 py-2.5 font-mono text-xs font-bold text-stone-600 border border-[#e5dfd2] opacity-75 shadow-xs"
             title="Backend execution engine pending integration"
           >
             Execute MCI-01 Surge Runbook
@@ -143,9 +143,9 @@ export function RunbookVisualizer({
         {/* TrueForge Safety Governance Notice */}
         <div
           data-testid="safety-governance-notice"
-          className="rounded border border-red-500/30 bg-red-950/20 px-3 py-2 text-[11px] text-red-200"
+          className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-3 text-xs sm:text-[13px] text-red-950 shadow-xs"
         >
-          <strong className="font-mono uppercase text-red-300">Safety Governance:</strong> Steps
+          <strong className="font-mono uppercase text-red-900 font-black">Safety Governance:</strong> Steps
           10–13 require explicit Human-in-the-Loop authorization. No automatic progression through
           RED consequential actions without verified operator consent.
         </div>
@@ -161,7 +161,7 @@ export function RunbookVisualizer({
         {/* 15 Operational Step Cards */}
         <div
           data-testid="runbook-step-list"
-          className="space-y-2.5 pt-2 max-h-[600px] overflow-y-auto pr-1"
+          className="space-y-2.5 pt-2 max-h-[600px] overflow-y-auto pr-1.5 custom-scrollbar"
         >
           {mergedSteps.map((step) => (
             <RunbookStep

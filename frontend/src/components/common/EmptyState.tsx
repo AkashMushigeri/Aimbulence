@@ -18,10 +18,10 @@ export function EmptyState({
   return (
     <div
       data-testid="empty-state"
-      className="rounded border border-dashed border-surface-border bg-surface/40 px-4 py-6 text-center"
+      className="rounded-xl border border-dashed border-[#d8d0c0] bg-[#fbf9f4] px-4 py-6 text-center"
     >
-      <p className="text-sm font-medium text-slate-300">{title}</p>
-      {children ? <div className="mt-2 text-sm text-slate-400">{children}</div> : null}
+      <p className="text-sm sm:text-base font-bold text-stone-800">{title}</p>
+      {children ? <div className="mt-2 text-xs sm:text-sm font-medium text-stone-600">{children}</div> : null}
     </div>
   );
 }

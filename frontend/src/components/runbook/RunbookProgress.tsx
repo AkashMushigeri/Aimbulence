@@ -24,18 +24,18 @@ export function RunbookProgress({
 
   return (
     <div className="space-y-3" data-testid="runbook-progress-container">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-mono text-slate-400">
+      <div className="flex items-center justify-between text-xs sm:text-[13px]">
+        <span className="font-mono text-stone-600">
           {isStarted ? (
             <>
-              Step <strong className="text-slate-100">{effectiveCurrent}</strong> of{" "}
-              <strong>{totalSteps}</strong>
+              Step <strong className="text-stone-900 font-bold">{effectiveCurrent}</strong> of{" "}
+              <strong className="text-stone-900 font-bold">{totalSteps}</strong>
             </>
           ) : (
-            <span>15 Planned Operational Steps</span>
+            <span className="font-medium">15 Planned Operational Steps</span>
           )}
         </span>
-        <span className="font-mono text-xs font-semibold text-slate-300">
+        <span className="font-mono text-xs sm:text-[13px] font-bold text-stone-800">
           {isStarted ? `${percent}%` : "0% (STANDBY)"}
         </span>
       </div>
@@ -48,7 +48,7 @@ export function RunbookProgress({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Runbook execution progress"
-          className="h-2 w-full overflow-hidden rounded-full bg-slate-800"
+          className="h-2.5 w-full overflow-hidden rounded-full bg-[#ede7dc] border border-[#e5dfd2]"
         >
           <div
             data-testid="runbook-progress-fill"
@@ -59,7 +59,7 @@ export function RunbookProgress({
                 ? "bg-amber-500"
                 : isCompleted
                 ? "bg-emerald-500"
-                : "bg-blue-500"
+                : "bg-sky-500"
             }`}
             style={{ width: `${percent}%` }}
           />
@@ -78,17 +78,17 @@ export function RunbookProgress({
           const isStepCompleted = isStarted && (isCompleted || stepNum < currentStep);
           const isStepActive = isStarted && !isCompleted && stepNum === currentStep;
 
-          let dotClass = "bg-slate-700 text-slate-500";
+          let dotClass = "bg-[#ede7dc] text-stone-600 border border-[#e5dfd2]";
           if (isStepCompleted) {
             dotClass = isCheckpointed
-              ? "bg-red-500/80 text-white"
-              : "bg-emerald-500/80 text-white";
+              ? "bg-red-500 text-white font-bold"
+              : "bg-emerald-500 text-white font-bold";
           } else if (isStepActive) {
             dotClass = isPaused || isCheckpointed
-              ? "bg-amber-400 text-slate-900 ring-2 ring-amber-400/50 animate-pulse"
-              : "bg-blue-400 text-slate-900 ring-2 ring-blue-400/50 animate-pulse";
+              ? "bg-amber-500 text-white ring-2 ring-amber-300 animate-pulse font-bold"
+              : "bg-sky-600 text-white ring-2 ring-sky-300 animate-pulse font-bold";
           } else if (isCheckpointed) {
-            dotClass = "border border-red-500/40 bg-red-950/40 text-red-400";
+            dotClass = "border border-red-300 bg-red-100 text-red-800 font-bold";
           }
 
           return (

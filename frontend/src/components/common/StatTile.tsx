@@ -9,10 +9,10 @@ export function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded border border-surface-border bg-surface/60 px-3 py-2">
-      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="mt-1 font-mono text-lg text-slate-100">{value}</p>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl border border-[#e5dfd2] bg-[#fbf9f4] p-4 shadow-sm hover:shadow-md hover:border-[#d8d0c0] transition-all duration-200">
+      <p className="text-xs font-mono font-bold uppercase tracking-wider text-stone-600">{label}</p>
+      <p className="mt-1 font-mono text-2xl sm:text-3xl font-black tracking-tight text-stone-900">{value}</p>
+      {hint ? <p className="mt-1 text-xs sm:text-[13px] text-stone-600 font-medium">{hint}</p> : null}
     </div>
   );
 }

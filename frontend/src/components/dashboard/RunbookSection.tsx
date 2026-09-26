@@ -41,7 +41,7 @@ export function RunbookSection({
           <div className="flex items-center gap-2">
             <span
               data-testid="runbook-status-badge"
-              className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wide text-amber-300"
+              className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wide text-amber-800 shadow-xs"
             >
               NOT CONNECTED / WAITING FOR EXECUTION ENGINE
             </span>
@@ -50,7 +50,7 @@ export function RunbookSection({
                 type="button"
                 data-testid="initiate-runbook-btn"
                 onClick={onInitiateRunbook}
-                className="rounded border border-sky-500/60 bg-sky-950/40 px-2.5 py-0.5 font-mono text-xs font-semibold text-sky-300 hover:bg-sky-900/60"
+                className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-1 font-mono text-xs font-bold text-sky-700 hover:bg-sky-100 hover:border-sky-400 transition-all shadow-xs"
               >
                 Initiate MCI-01
               </button>
@@ -58,30 +58,30 @@ export function RunbookSection({
           </div>
         }
       >
-        <div className="space-y-4 rounded-lg border border-dashed border-surface-border bg-surface/30 p-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-surface-border/50 pb-2">
+        <div className="space-y-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200/80 pb-3">
             <div>
-              <span className="text-xs uppercase tracking-wider text-slate-400">Target Runbook</span>
-              <p data-testid="runbook-id" className="font-mono text-base font-bold text-slate-100">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Target Runbook</span>
+              <p data-testid="runbook-id" className="font-mono text-base font-extrabold text-slate-900">
                 MCI-01 — Mass-Casualty Response Runbook
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xs uppercase tracking-wider text-slate-400">Engine State</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Engine State</span>
               <p
                 data-testid="runbook-engine-state"
-                className="font-mono text-xs font-semibold text-amber-300"
+                className="font-mono text-xs font-bold text-amber-700"
               >
                 NOT CONNECTED / WAITING FOR EXECUTION ENGINE
               </p>
             </div>
           </div>
 
-          <div className="space-y-2 text-xs text-slate-400">
+          <div className="space-y-2 text-xs text-slate-600">
             <p>
               The TrueForge agent loop and runbook execution engine interface is planned for subsequent integration. In accordance with system safety governance:
             </p>
-            <ul className="list-disc space-y-1 pl-4 text-slate-400">
+            <ul className="list-disc space-y-1 pl-4 text-slate-600">
               <li>No fake execution steps or simulated tool progress are fabricated.</li>
               <li>No artificial completion percentages or progress bars are displayed.</li>
               <li>The full runbook visualizer remains gated until the backend execution state contract is served.</li>
@@ -121,14 +121,14 @@ export function RunbookSection({
         <div className="flex flex-wrap items-center gap-2">
           <span
             data-testid="runbook-status-badge"
-            className={`rounded border px-2 py-0.5 font-mono text-xs uppercase tracking-wide ${
+            className={`rounded-full border px-3 py-0.5 font-mono text-xs uppercase tracking-wide shadow-xs ${
               isAwaitingApproval
-                ? "border-red-500/60 bg-red-950/40 text-red-300 animate-pulse font-bold"
+                ? "border-red-400 bg-red-100 text-red-800 animate-pulse font-extrabold"
                 : isCompleted
-                ? "border-emerald-500/60 bg-emerald-950/30 text-emerald-300"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 font-bold"
                 : isBlocked
-                ? "border-rose-500/60 bg-rose-950/30 text-rose-300"
-                : "border-sky-500/60 bg-sky-950/30 text-sky-300"
+                ? "border-rose-300 bg-rose-50 text-rose-800 font-bold"
+                : "border-sky-300 bg-sky-50 text-sky-800 font-bold"
             }`}
           >
             {execution.state}
@@ -138,7 +138,7 @@ export function RunbookSection({
               type="button"
               data-testid="review-checkpoint-btn"
               onClick={() => setModalOpen(true)}
-              className="rounded border border-red-500 bg-red-600 px-3 py-1 font-mono text-xs font-extrabold uppercase text-white shadow-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="rounded-lg border border-red-600 bg-red-600 px-3.5 py-1.5 font-mono text-xs font-black uppercase text-white shadow-md shadow-red-600/30 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all active:scale-[0.98]"
             >
               Review & Authorize Checkpoint
             </button>
@@ -148,34 +148,34 @@ export function RunbookSection({
     >
       <div className="space-y-4">
         {/* Runbook Header */}
-        <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border border-surface-border bg-surface/40 p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 shadow-xs">
           <div>
-            <span className="text-xs uppercase tracking-wider text-slate-400">Target Runbook</span>
-            <p data-testid="runbook-id" className="font-mono text-base font-bold text-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Target Runbook</span>
+            <p data-testid="runbook-id" className="font-mono text-base font-extrabold text-slate-900">
               MCI-01 — Mass-Casualty Response Runbook
             </p>
-            <p className="mt-0.5 text-xs text-slate-400 font-mono">
-              Execution ID: <span className="text-slate-200">{execution.execution_id}</span>
+            <p className="mt-0.5 text-xs text-slate-500 font-mono">
+              Execution ID: <span className="text-slate-800 font-semibold">{execution.execution_id}</span>
             </p>
           </div>
           <div className="text-right">
-            <span className="text-xs uppercase tracking-wider text-slate-400">Engine State</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Engine State</span>
             <p
               data-testid="runbook-engine-state"
-              className={`font-mono text-xs font-bold uppercase ${
+              className={`font-mono text-xs font-extrabold uppercase ${
                 isAwaitingApproval
-                  ? "text-red-400"
+                  ? "text-red-700"
                   : isCompleted
-                  ? "text-emerald-400"
+                  ? "text-emerald-700"
                   : isBlocked
-                  ? "text-rose-400"
-                  : "text-sky-300"
+                  ? "text-rose-700"
+                  : "text-sky-700"
               }`}
             >
               {execution.state}
             </p>
-            <p className="mt-0.5 text-xs text-slate-400 font-mono">
-              Current: <span className="text-slate-200">{execution.current_step_id ?? "N/A"}</span>
+            <p className="mt-0.5 text-xs text-slate-500 font-mono">
+              Current: <span className="text-slate-800 font-semibold">{execution.current_step_id ?? "N/A"}</span>
             </p>
           </div>
         </div>
@@ -186,18 +186,21 @@ export function RunbookSection({
             data-testid="checkpoint-paused-alert"
             role="alert"
             aria-live="assertive"
-            className="rounded-lg border-2 border-red-500 bg-red-950/40 p-4 shadow-lg shadow-red-950/40"
+            className="rounded-2xl border-2 border-red-500 bg-gradient-to-r from-red-50 via-rose-50 to-red-100 p-5 shadow-lg shadow-red-500/10 ring-1 ring-red-500/20"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 animate-ping rounded-full bg-red-500" />
-                  <span className="font-mono text-sm font-black tracking-wider text-red-300">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600" />
+                  </span>
+                  <span className="font-mono text-sm font-black tracking-wider text-red-950">
                     AGENT PAUSED — WAITING FOR HUMAN AUTHORIZATION
                   </span>
                 </div>
-                <p className="text-xs text-slate-200">
-                  Consequential action reached at <strong>Step 10 (MCI-01-10)</strong>: Preempt Operating Room OR-3.
+                <p className="text-xs text-red-900 leading-relaxed max-w-xl font-medium">
+                  Consequential action reached at <strong className="text-red-950 font-mono font-bold">Step 10 (MCI-01-10)</strong>: Preempt Operating Room OR-3.
                   The TrueForge agent loop is stopped and will not proceed without an authentic human signal.
                 </p>
               </div>
@@ -206,7 +209,7 @@ export function RunbookSection({
                 type="button"
                 data-testid="open-approval-modal-btn"
                 onClick={() => setModalOpen(true)}
-                className="rounded border border-red-400 bg-red-600 px-4 py-2 font-mono text-xs font-extrabold uppercase tracking-wide text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400"
+                className="rounded-xl border border-red-600 bg-red-600 px-4 py-2.5 font-mono text-xs font-extrabold uppercase tracking-wider text-white shadow-md shadow-red-600/30 hover:bg-red-500 hover:shadow-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all active:scale-[0.98]"
               >
                 Review Approval Proposal
               </button>
@@ -218,12 +221,12 @@ export function RunbookSection({
         {isCompleted ? (
           <div
             data-testid="runbook-completed-alert"
-            className="rounded-lg border border-emerald-500/50 bg-emerald-950/30 p-4 text-xs text-emerald-200"
+            className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-4 text-xs text-emerald-900 shadow-xs"
           >
-            <strong className="font-mono text-sm uppercase text-emerald-300">
+            <strong className="font-mono text-sm uppercase font-extrabold text-emerald-950">
               SURGE READINESS REALIZED — EXECUTION COMPLETE & VERIFIED
             </strong>
-            <p className="mt-1 text-slate-300">
+            <p className="mt-1 text-emerald-800">
               All 15 steps executed successfully. OR-3 preemption was verified on disk. Shortage resolved.
             </p>
           </div>
@@ -233,24 +236,24 @@ export function RunbookSection({
         {isBlocked ? (
           <div
             data-testid="runbook-blocked-alert"
-            className="rounded-lg border border-rose-500/50 bg-rose-950/30 p-4 text-xs text-rose-200"
+            className="rounded-xl border border-rose-300 bg-rose-50/80 p-4 text-xs text-rose-900 shadow-xs"
           >
-            <strong className="font-mono text-sm uppercase text-rose-300">
+            <strong className="font-mono text-sm uppercase font-extrabold text-rose-950">
               CONSEQUENTIAL ACTION REJECTED — RUNBOOK BLOCKED SAFELY
             </strong>
-            <p className="mt-1 text-slate-300">
+            <p className="mt-1 text-rose-800">
               Human operator denied preemption. Operating room state was left unmodified in SQLite.
             </p>
           </div>
         ) : null}
 
         {/* 15 STEPS VISUALIZER */}
-        <div className="space-y-1.5 rounded-lg border border-surface-border bg-surface/20 p-3">
-          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="space-y-2 rounded-2xl border border-[#e5dfd2] bg-[#fffdf9] p-4 sm:p-5 shadow-xs">
+          <p className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-700">
             MCI-01 Procedure Step Flow
           </p>
 
-          <div className="divide-y divide-surface-border/40">
+          <div className="divide-y divide-[#ece5d8]">
             {MCI_01_STEPS.map((step) => {
               const stepId = `MCI-01-${String(step.index).padStart(2, "0")}`;
               const isStepCompleted =
@@ -270,20 +273,20 @@ export function RunbookSection({
                 <div
                   key={step.index}
                   data-testid={`runbook-step-${step.index}`}
-                  className={`flex flex-col gap-2 py-2 text-xs ${
+                  className={`flex flex-col gap-2 py-2.5 text-xs sm:text-[13px] ${
                     isCurrentStep && isAwaitingApproval
-                      ? "rounded bg-red-950/30 px-2 font-bold text-red-200"
+                      ? "rounded-xl bg-red-50 border border-red-300 p-3 font-bold text-red-950 shadow-xs"
                       : isStepCompleted
-                      ? "text-slate-300"
-                      : "text-slate-500"
+                      ? "text-stone-800 font-medium"
+                      : "text-stone-600"
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-slate-400">
+                      <span className="font-mono text-stone-500 font-semibold">
                         {String(step.index).padStart(2, "0")}.
                       </span>
-                      <span>{step.title}</span>
+                      <span className="font-medium text-stone-900">{step.title}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -292,7 +295,7 @@ export function RunbookSection({
                       {stepVerification?.status === "VERIFIED" && (
                         <span
                           data-testid={`step-verification-${step.index}`}
-                          className="rounded border border-emerald-500/50 bg-emerald-950/60 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-300"
+                          className="rounded border border-emerald-400 bg-emerald-100 px-2 py-0.5 font-mono text-[10px] font-extrabold text-emerald-900"
                         >
                           ✓ STATE VERIFIED
                         </span>
@@ -301,7 +304,7 @@ export function RunbookSection({
                       {stepVerification?.status === "FAILED" && (
                         <span
                           data-testid={`step-verification-${step.index}`}
-                          className="rounded border border-rose-500/50 bg-rose-950/60 px-1.5 py-0.5 font-mono text-[9px] font-bold text-rose-300"
+                          className="rounded border border-rose-400 bg-rose-100 px-2 py-0.5 font-mono text-[10px] font-extrabold text-rose-900"
                         >
                           ✗ MISMATCH
                         </span>
@@ -309,14 +312,14 @@ export function RunbookSection({
 
                       <span
                         data-testid={`step-status-${step.index}`}
-                        className={`font-mono text-[10px] uppercase ${
+                        className={`font-mono text-xs uppercase font-bold ${
                           isCurrentStep && isAwaitingApproval
-                            ? "font-bold text-red-400"
+                            ? "text-red-700"
                             : isStepCompleted
-                            ? "text-emerald-400"
+                            ? "text-emerald-700"
                             : isBlocked && isCurrentStep
-                            ? "text-rose-400"
-                            : "text-slate-500"
+                            ? "text-rose-700"
+                            : "text-stone-500"
                         }`}
                       >
                         {isCurrentStep && isAwaitingApproval
