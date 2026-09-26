@@ -10,7 +10,9 @@ import type {
 } from "@/types/api/contracts";
 import type { ApprovalProposal } from "@/types/domain";
 import { toApprovalProposal } from "@/lib/mappers";
+import { toVerificationResult } from "@/types/domain";
 import { ApprovalCheckpointModal } from "@/components/approval";
+import { VerificationCard } from "@/components/verification";
 
 export interface RunbookSectionProps {
   readonly execution?: RunbookExecutionStateWire | null;
@@ -290,11 +292,16 @@ export function RunbookSection({
                 stepId === execution.current_step_id || step.index === currentStepNum;
               const tier = MCI_01_STEP_TIERS[step.index] ?? "GREEN";
 
+              const stepResult = execution.step_results?.[stepId] as Record<string, unknown> | undefined;
+              const stepVerification = stepResult?.verification
+                ? toVerificationResult(stepResult.verification)
+                : null;
+
               return (
                 <div
                   key={step.index}
                   data-testid={`runbook-step-${step.index}`}
-                  className={`flex flex-wrap items-center justify-between gap-2 py-2 text-xs ${
+                  className={`flex flex-col gap-2 py-2 text-xs ${
                     isCurrentStep && isAwaitingApproval
                       ? "rounded bg-red-950/30 px-2 font-bold text-red-200"
                       : isStepCompleted
@@ -302,36 +309,63 @@ export function RunbookSection({
                       : "text-slate-500"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-slate-400">
-                      {String(step.index).padStart(2, "0")}.
-                    </span>
-                    <span>{step.title}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-slate-400">
+                        {String(step.index).padStart(2, "0")}.
+                      </span>
+                      <span>{step.title}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <SafetyTierBadge tier={tier} />
+
+                      {stepVerification?.status === "VERIFIED" && (
+                        <span
+                          data-testid={`step-verification-${step.index}`}
+                          className="rounded border border-emerald-500/50 bg-emerald-950/60 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-300"
+                        >
+                          ✓ STATE VERIFIED
+                        </span>
+                      )}
+
+                      {stepVerification?.status === "FAILED" && (
+                        <span
+                          data-testid={`step-verification-${step.index}`}
+                          className="rounded border border-rose-500/50 bg-rose-950/60 px-1.5 py-0.5 font-mono text-[9px] font-bold text-rose-300"
+                        >
+                          ✗ MISMATCH
+                        </span>
+                      )}
+
+                      <span
+                        data-testid={`step-status-${step.index}`}
+                        className={`font-mono text-[10px] uppercase ${
+                          isCurrentStep && isAwaitingApproval
+                            ? "font-bold text-red-400"
+                            : isStepCompleted
+                            ? "text-emerald-400"
+                            : isBlocked && isCurrentStep
+                            ? "text-rose-400"
+                            : "text-slate-500"
+                        }`}
+                      >
+                        {isCurrentStep && isAwaitingApproval
+                          ? "WAITING_APPROVAL"
+                          : isStepCompleted
+                          ? "COMPLETED"
+                          : isBlocked && isCurrentStep
+                          ? "BLOCKED"
+                          : "PENDING"}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <SafetyTierBadge tier={tier} />
-                    <span
-                      data-testid={`step-status-${step.index}`}
-                      className={`font-mono text-[10px] uppercase ${
-                        isCurrentStep && isAwaitingApproval
-                          ? "font-bold text-red-400"
-                          : isStepCompleted
-                          ? "text-emerald-400"
-                          : isBlocked && isCurrentStep
-                          ? "text-rose-400"
-                          : "text-slate-500"
-                      }`}
-                    >
-                      {isCurrentStep && isAwaitingApproval
-                        ? "WAITING_APPROVAL"
-                        : isStepCompleted
-                        ? "COMPLETED"
-                        : isBlocked && isCurrentStep
-                        ? "BLOCKED"
-                        : "PENDING"}
-                    </span>
-                  </div>
+                  {step.index === 10 && stepVerification && isStepCompleted && (
+                    <div className="w-full pt-1">
+                      <VerificationCard verification={stepVerification} />
+                    </div>
+                  )}
                 </div>
               );
             })}

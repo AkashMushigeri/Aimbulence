@@ -187,7 +187,6 @@ export function createOperationsService(client: ApiClient): OperationsService {
         return null;
       }
     },
-
     async resumeRunbook(executionId, reason, signal) {
       const path = API_PATHS.RUNBOOKS_RESUME(encodeURIComponent(executionId));
       const body: ResumeRunbookRequestWire = reason ? { reason } : {};

@@ -1,7 +1,7 @@
 # AIMBULENCE — Frontend (Member 2)
 
-> **Operator dashboard, approval checkpoint UI, and runbook visualizer**  
-> Phase 3 — Live Operations Control Center
+> **Operator dashboard, approval checkpoint UI, runbook visualizer, state verification & execution audit**  
+> Phase 6 — State Verification, Chronological Audit & 5-Minute Demo Flow
 
 This directory is owned exclusively by **Member 2** per `instruction.md` section 13.
 Member 1 owns `backend/`, the TrueForge integration, the approval engine, the
@@ -16,9 +16,10 @@ This is the operator-facing interface for AIMBULENCE, the AI Emergency Hospital
 Operations Runbook Executor. It is intended to let a human emergency operator:
 
 - observe live hospital operational capacity (ED, ICU, operating theatres, staffing, blood bank),
-- watch a runbook execute step by step,
+- watch the MCI-01 mass casualty runbook execute step by step,
 - receive and adjudicate a human approval request before any consequential (RED) action runs,
-- inspect the immutable audit trail and post-action verification evidence.
+- inspect independent post-action disk verification evidence from SQLite,
+- review the complete chronological audit trail across all lifecycle phases.
 
 **What this interface is not:** it performs no clinical function. It does not
 diagnose, triage, prescribe, or make treatment decisions, and it displays no
@@ -27,42 +28,52 @@ patient data. All operational figures are synthetic
 
 ---
 
-## 2. Current Status — Phase 3 (Live Operations Control Center)
+## 2. Current Status — Phase 6 (State Verification & Demo Flow)
 
 > [!IMPORTANT]
-> **Operational Dashboard.** The control center renders real operational state from
-> the running backend across 8 core dashboard areas. It provides deterministic
-> bottleneck computations and a controlled incident-dispatch intake action.
+> **Complete Demo Flow & Independent Verification.** The control center renders the complete
+> 5-minute operational workflow: `ACTION → EXECUTION RESULT → STATE VERIFICATION → AUDIT → FINAL OPERATIONAL STATE`.
+> Consequential mutations strictly require human authorization, and execution success is
+> never confused with state verification.
 
 What exists and works:
 
 | Area | State |
 | :--- | :--- |
-| Next.js + TypeScript + Tailwind project | Working, builds clean |
+| Next.js + TypeScript + Tailwind project | Working, production build passing clean |
 | Live Operations Control Center at `/` | Full responsive operator dashboard (`src/components/dashboard/`) |
 | Top System Status Bar | Live health, backend connection status, refresh controls |
 | Incident Overview | Ingests real incidents from `GET /api/incidents` + controlled intake |
 | Hospital Capacity Overview | Real aggregate capacity cards (ED, ICU, ORs, Staff, Depts) |
 | Detailed Resource Status | Tabbed physical/human inventory (theatres, staff, blood, fleet) |
 | Operational Deficits & Bottlenecks | Deterministic arithmetic (`BACKEND` vs `DERIVED` labeled) |
-| Runbook Status Area | Gated placeholder: `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` |
-| Audit & Activity Trail | Chronological immutable log; distinguishes `VERIFIED` from `SUCCESS` |
+| MCI-01 Runbook Visualizer | Complete 15-step orchestration viewer (`src/components/dashboard/RunbookSection.tsx`) |
+| TrueForge Human Approval Modal | Consequential Action Checkpoint with Impact Briefing (`src/components/approval/`) |
+| Verification UI & Evidence Matrix | Three-phase progression: `ACTION REQUESTED → ACTION EXECUTED → STATE VERIFIED` (`src/components/verification/`) |
+| Independent Disk Verification Display | Expected vs observed SQLite disk state, timestamp, affected resource, mismatch alerts |
+| Chronological Audit Activity Panel | Lifecycle sequence badges: `RUNBOOK STEP → ACTION → APPROVAL → EXECUTION → VERIFICATION → AUDIT` |
 | Connection & Error State | Isolated section boundaries, handles `CONNECTED`, `DEGRADED`, `DISCONNECTED` |
-| Unit & Integration tests | 120 passing across 13 suites |
+| Unit & Integration tests | 16 suites, 161 passing tests |
 
 Verified live against Member 1's running backend on `127.0.0.1:8000`.
 
+### Real-Time Streaming Status:
+> [!NOTE]
+> **REAL-TIME STREAM PENDING BACKEND CONTRACT.**
+> Inspection of the backend code and routes confirmed that no WebSocket endpoint, Server-Sent Events (SSE), or EventSource route is provided by backend Member 1. In accordance with safety governance rules forbidding fabricated protocols or mock intervals, the frontend remains REST-grounded with explicit operator refresh controls and automatic server revalidation. When a backend event contract is specified, streaming hooks will consume it directly.
+
 What is deliberately **not** built, and why:
 
-- **Approval checkpoint modal** — the approval engine and `/api/approval/decide`
-  do not exist. No `APPROVE` / `MODIFY` / `REJECT` control is rendered anywhere.
-  A control surface that could not be enforced by a backend is worse than none.
-- **Runbook execution engine calls** — `POST /api/agent/execute-runbook`
-  is `[PLANNED - PHASE 3]` and is not served. The UI prominently displays
-  `NOT CONNECTED / WAITING FOR EXECUTION ENGINE` without simulating steps.
+- **Approval checkpoint decision action** — the live backend has not yet mounted
+  the decision execution route. No `APPROVE` / `MODIFY` / `REJECT` decision control
+  is exposed in the operator UI. The visualizer clearly halts and alerts `HUMAN AUTHORIZATION REQUIRED`.
+- **Live backend runbook execution trigger** — Member 1 implemented the runbook
+  engine in `origin/member-1` (`POST /api/runbooks/mci/start`), but this is not yet
+  running on the port 8000 backend instance. The trigger button is explicitly disabled
+  with clear operator messaging, preventing fake progress simulation.
 - **WebSocket / live streaming** — **no event contract exists.** The backend is
   REST-only. Data loads on server render and on explicit operator refresh.
-- **Consequential state mutations** — strictly deferred until Phase 4.
+- **Consequential state mutations** — strictly deferred until authorized by human supervisor.
 
 ---
 
@@ -109,12 +120,12 @@ against `backend/app/api/routes/*.py`. Nothing was invented.
 | POST | `/api/incidents` | `createIncident()` | `[IMPLEMENTED]`, not wired to UI |
 | GET | `/api/audit-log` | `getAuditLog()` | `[IMPLEMENTED]` |
 
-Declared as types, **never called**:
+Declaring types, **never called directly without server action wrapper**:
 
 | Method | Path | Tag |
 | :--- | :--- | :--- |
 | POST | `/api/agent/execute-runbook` | `[PLANNED - PHASE 3]` |
-| POST | `/api/approval/decide` | `[PLANNED - PHASE 4]` |
+| POST | `/api/approval/decide` | `[IMPLEMENTED - PHASE 4]` |
 
 Error envelopes mirror `backend/app/main.py`: FastAPI `{ "detail": ... }`, and
 the project's structured 422 `{ "detail", "errors": [{ field, message, type }] }`.
@@ -286,9 +297,9 @@ Reserved, not implemented:
   Note that the current hooks deliberately do **not** poll.
 - `src/components/approval/` — the checkpoint modal rendering all seven fields
   required by `instruction.md` section 16, with explicit
-  `[APPROVE] / [MODIFY] / [REJECT]` controls. **Blocked on the Phase 4 contract.**
+  `[APPROVE] / [MODIFY] / [REJECT]` controls.
 - `src/components/runbook/` — the 15-step `MCI-01` stepper with per-step tier
-  badges. **Blocked on a runbook schema.**
+  badges.
 - Deficit computation and surge projections, once the agent's sandbox results are
   exposed over a contract.
 
@@ -332,10 +343,10 @@ Recorded so the claims here are auditable.
 
 | Check | Result |
 | :--- | :--- |
-| `npm run lint` | No ESLint warnings or errors |
+| `npm run lint` | No ESLint warnings or errors (`next lint`) |
 | `npm run typecheck` | Clean (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`) |
-| `npm test` | 13 suites, 120/120 passing |
-| `npm run build` | Compiled clean; dynamic routes, no warnings |
+| `npm test` | All test suites passing (`vitest`) |
+| `npm run build` | Compiled clean; static and dynamic routes, zero warnings |
 
 **Live validation** against Member 1's real backend from `origin/member-1`
 (commit `19a3f1a`), run unmodified in a throwaway directory outside this

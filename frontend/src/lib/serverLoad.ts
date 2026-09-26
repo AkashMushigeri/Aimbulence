@@ -116,4 +116,3 @@ function pick<T>(section: SectionState | undefined): T | undefined {
 }
 
 export { LOADING };
-

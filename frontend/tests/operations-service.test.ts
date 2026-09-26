@@ -458,8 +458,6 @@ describe("Phase 4 & 5 approval and runbook services", () => {
     });
     expect(started.runbook_execution_id).toBe("RBX-D736A471");
     expect(started.state).toBe("WAITING_FOR_APPROVAL");
-  });
-
   it("fetches the latest runbook execution or returns null if none exists", async () => {
     const mockExecution = {
       execution_id: "RBX-D736A471",
@@ -491,4 +489,3 @@ describe("Phase 4 & 5 approval and runbook services", () => {
     expect(empty).toBeNull();
   });
 });
-

@@ -112,7 +112,6 @@ export function OperationsDashboard({
       }
 
       const execWire = res.execution as StartRunbookResponseWire | RunbookExecutionStateWire;
-      const execId = "runbook_execution_id" in execWire ? execWire.runbook_execution_id : execWire.execution_id;
 
       setExecution(res.execution as RunbookExecutionStateWire);
 

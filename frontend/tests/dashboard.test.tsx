@@ -320,7 +320,6 @@ describe("AIMBULENCE Phase 3 Live Operations Control Center", () => {
     );
     expect(screen.queryByRole("progressbar")).toBeNull();
   });
-
   // 15. Renders active runbook execution paused at TrueForge checkpoint
   it("15. renders active runbook execution with prominent paused alert and Step 10 waiting approval", () => {
     const mockExecution = {

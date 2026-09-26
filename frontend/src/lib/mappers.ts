@@ -15,19 +15,24 @@ import type {
   DepartmentStatusWire,
   HospitalStatusWire,
   IncidentWire,
-  ResourceStatusWire,
+  RunbookExecutionStateWire,
+  RunbookStepResultWire,
 } from "@/types/api/contracts";
+
 import type {
+  AgentExecutionState,
   AuditEvent,
   BloodInventory,
   DepartmentStatus,
+  ExecutionStatus,
   HospitalCapacity,
   Incident,
   ResourceStatus,
+  RunbookStepDetail,
   StaffAvailability,
   StaffMember,
+  StepExecutionStatus,
 } from "@/types/domain";
-
 function required<T>(value: T | null | undefined, field: string): T {
   if (value === null || value === undefined) {
     throw new TypeError(`Contract violation: expected non-null value for "${field}"`);
@@ -165,6 +170,105 @@ export function toAuditEvent(wire: AuditEventWire): AuditEvent {
   };
 }
 
+export function toExecutionStatus(wireStatus: string): ExecutionStatus {
+  const upper = (wireStatus ?? "").toUpperCase();
+  if (upper === "RUNNING") return "RUNNING";
+  if (upper === "WAITING_FOR_APPROVAL" || upper === "AWAITING_APPROVAL" || upper === "PAUSED") return "PAUSED";
+  if (upper === "COMPLETED") return "COMPLETED";
+  if (upper === "FAILED") return "FAILED";
+  if (upper === "REJECTED" || upper === "DENIED") return "REJECTED";
+  if (upper === "VERIFIED") return "VERIFIED";
+  if (upper === "ESCALATED") return "ESCALATED";
+  if (upper === "BLOCKED" || upper === "HALTED") return "HALTED";
+  if (upper === "PENDING" || upper === "IDLE") return "PENDING";
+  return "RUNNING";
+}
+
+export function toStepExecutionStatus(wireStatus: string): StepExecutionStatus {
+  const upper = (wireStatus ?? "").toUpperCase();
+  if (upper === "COMPLETED") return "COMPLETED";
+  if (upper === "RUNNING") return "RUNNING";
+  if (upper === "WAITING_FOR_APPROVAL" || upper === "AWAITING_APPROVAL" || upper === "PAUSED") return "PAUSED";
+  if (upper === "FAILED") return "FAILED";
+  if (upper === "BLOCKED") return "BLOCKED";
+  if (upper === "SKIPPED") return "SKIPPED";
+  if (upper === "REJECTED" || upper === "DENIED") return "REJECTED";
+  return "PENDING";
+}
+
+export function toRunbookStepDetail(wire: RunbookStepResultWire): RunbookStepDetail {
+  return {
+    stepId: required(wire.step_id, "step_id"),
+    stepNumber: required(wire.step_number, "step_number"),
+    name: required(wire.name, "name"),
+    description: "",
+    safetyCategory: required(wire.safety_category, "safety_category"),
+    status: toStepExecutionStatus(required(wire.status, "status")),
+    actionTool: wire.name,
+    isApprovalCheckpoint: wire.safety_category === "RED",
+    ...(wire.verification !== undefined ? { verification: wire.verification } : {}),
+    ...(wire.error ? { error: wire.error } : {}),
+    ...(wire.started_at ? { startedAt: wire.started_at } : {}),
+    ...(wire.completed_at ? { completedAt: wire.completed_at } : {}),
+  };
+}
+
+export function toAgentExecutionState(
+  wire: RunbookExecutionStateWire | Record<string, unknown>,
+): AgentExecutionState {
+  const rawState =
+    (wire as RunbookExecutionStateWire).state ??
+    (wire as { status?: string }).status ??
+    "PENDING";
+  const status = toExecutionStatus(String(rawState));
+  const isWaiting = status === "PAUSED" || rawState === "WAITING_FOR_APPROVAL";
+
+  let currentStep = 1;
+  const currentStepId = (wire as RunbookExecutionStateWire).current_step_id;
+  const currentStepNum = (wire as { current_step?: number }).current_step;
+  const completedSteps = (wire as RunbookExecutionStateWire).completed_steps ?? [];
+
+  if (typeof currentStepNum === "number" && currentStepNum > 0) {
+    currentStep = currentStepNum;
+  } else if (currentStepId) {
+    const match = currentStepId.match(/(\d+)$/);
+    if (match && match[1]) {
+      currentStep = parseInt(match[1], 10);
+    }
+  } else if (completedSteps.length > 0) {
+    currentStep = Math.min(15, completedSteps.length + 1);
+  }
+
+  const executionId =
+    (wire as RunbookExecutionStateWire).execution_id ??
+    (wire as { runbook_execution_id?: string }).runbook_execution_id;
+
+  return {
+    executionId: required(executionId, "execution_id"),
+    incidentId: required((wire as RunbookExecutionStateWire).incident_id, "incident_id"),
+    runbookId: required((wire as RunbookExecutionStateWire).runbook_id, "runbook_id"),
+    status,
+    currentStep,
+    totalSteps: (wire as { total_steps?: number }).total_steps ?? 15,
+    activeCheckpoint:
+      (wire as RunbookExecutionStateWire).checkpoint_id ??
+      (wire as { active_checkpoint?: string | null }).active_checkpoint ??
+      null,
+    gateState: isWaiting ? "AWAITING_OPERATOR" : "NOT_BLOCKED",
+    startedAt: required((wire as RunbookExecutionStateWire).started_at, "started_at"),
+    ...(currentStepId ? { currentStepId } : {}),
+    completedSteps,
+    stepResults: (wire as RunbookExecutionStateWire).step_results ?? {},
+    ...((wire as RunbookExecutionStateWire).error_message
+      ? { errorMessage: (wire as RunbookExecutionStateWire).error_message }
+      : {}),
+    ...((wire as RunbookExecutionStateWire).completed_at
+      ? { completedAt: (wire as RunbookExecutionStateWire).completed_at }
+      : {}),
+  };
+}
+
+>>>>>>> member-2
 export function formatStateSummary(state: Readonly<Record<string, unknown>> | undefined): string {
   if (!state || Object.keys(state).length === 0) {
     return "NOT PROVIDED BY BACKEND";
@@ -238,6 +342,4 @@ export function toRunbookExecution(
     activeCheckpoint: wire.checkpoint_id ?? null,
     gateState: isAwaiting ? "AWAITING_OPERATOR" : "NOT_BLOCKED",
     startedAt: wire.started_at,
-  };
 }
-
