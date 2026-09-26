@@ -49,6 +49,7 @@ dist/
 build/
 
 # Databases (Local test instances)
+*.db
 *.sqlite
 *.sqlite3
 *.db-journal
