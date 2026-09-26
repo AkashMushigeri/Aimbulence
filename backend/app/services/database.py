@@ -148,6 +148,43 @@ class AuditEventRecord(Base):
     timestamp = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
 
+class RunbookExecutionRecord(Base):
+    __tablename__ = "runbook_executions"
+
+    id = Column(String(36), primary_key=True, default=lambda: f"RBX-{uuid.uuid4().hex[:8].upper()}")
+    runbook_id = Column(String(50), nullable=False, default="MCI-01")
+    incident_id = Column(String(36), nullable=False)
+    state = Column(String(30), nullable=False, default="PENDING")
+    current_step_id = Column(String(50), nullable=True)
+    checkpoint_id = Column(String(50), nullable=True)
+    parameters_json = Column(Text, nullable=False, default="{}")
+    context_json = Column(Text, nullable=False, default="{}")
+    summary_json = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    started_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    completed_at = Column(DateTime, nullable=True)
+
+
+class RunbookStepExecutionRecord(Base):
+    __tablename__ = "runbook_step_executions"
+
+    id = Column(String(36), primary_key=True, default=lambda: f"RBS-{uuid.uuid4().hex[:8].upper()}")
+    execution_id = Column(String(36), nullable=False, index=True)
+    step_id = Column(String(50), nullable=False)
+    step_number = Column(Integer, nullable=False)
+    name = Column(String(120), nullable=False)
+    safety_category = Column(String(10), nullable=False, default="GREEN")
+    status = Column(String(30), nullable=False, default="PENDING")
+    input_json = Column(Text, nullable=False, default="{}")
+    output_json = Column(Text, nullable=False, default="{}")
+    verification_json = Column(Text, nullable=False, default="{}")
+    error_message = Column(Text, nullable=True)
+    started_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    completed_at = Column(DateTime, nullable=True)
+
+
+
 # ==============================================================================
 # DATABASE LIFECYCLE & SEEDING
 # ==============================================================================
