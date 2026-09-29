@@ -34,6 +34,8 @@ export interface ConsoleData {
   readonly audit?: readonly AuditEvent[];
   readonly activeCheckpoint?: TrueForgeApprovalCheckpointWire | null;
   readonly execution?: RunbookExecutionStateWire | null;
+  readonly prearrivalCases?: readonly import("@/types/domain/prearrival").PreArrivalCase[];
+  readonly prearrivalResources?: import("@/types/domain/prearrival").PreArrivalResourcesOverview | null;
 }
 
 /** A not-configured backend is a first-class state, not an exception. */
@@ -94,6 +96,16 @@ export async function loadConsoleData(): Promise<ConsoleData> {
     // Non-fatal: if approval endpoints fail, retain main operational view
   }
 
+  let prearrivalCases: import("@/types/domain/prearrival").PreArrivalCase[] = [];
+  let prearrivalResources: import("@/types/domain/prearrival").PreArrivalResourcesOverview | null = null;
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    prearrivalCases = await prearrivalService.listCases().catch(() => []);
+    prearrivalResources = await prearrivalService.getResources().catch(() => null);
+  } catch {
+    // Non-fatal
+  }
+
   return {
     configured: true,
     sections,
@@ -104,6 +116,8 @@ export async function loadConsoleData(): Promise<ConsoleData> {
     audit: pick<readonly AuditEvent[]>(sections.audit),
     activeCheckpoint,
     execution,
+    prearrivalCases,
+    prearrivalResources,
   };
 }
 

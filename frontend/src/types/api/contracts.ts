@@ -429,6 +429,13 @@ export const API_PATHS = {
   RUNBOOKS_LIST: "/api/runbooks",
   RUNBOOKS_EXECUTION: (executionId: string) => `/api/runbooks/${executionId}`,
   RUNBOOKS_RESUME: (executionId: string) => `/api/runbooks/${executionId}/resume`,
+  PREARRIVAL_CASES: "/api/prearrival/cases",
+  PREARRIVAL_CASE_BY_ID: (caseId: string) => `/api/prearrival/cases/${caseId}`,
+  PREARRIVAL_CASE_DECISION: (caseId: string, actionId: string) => `/api/prearrival/cases/${caseId}/actions/${actionId}/decision`,
+  PREARRIVAL_CASE_LOCATION: (caseId: string) => `/api/prearrival/cases/${caseId}/location`,
+  PREARRIVAL_CASE_ARRIVE: (caseId: string) => `/api/prearrival/cases/${caseId}/arrive`,
+  PREARRIVAL_RESOURCES: "/api/prearrival/resources",
+  PREARRIVAL_DEMO_SEED: "/api/prearrival/demo-seed",
 } as const;
 
 /** Legacy / planned endpoint reference */

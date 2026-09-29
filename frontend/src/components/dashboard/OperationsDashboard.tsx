@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { BackendHealth } from "@/services/operations";
 import type { AuditEvent, HospitalCapacity, Incident, ResourceStatus } from "@/types/domain";
+import type { PreArrivalCase, PreArrivalResourcesOverview } from "@/types/domain/prearrival";
 import type { SectionKey } from "@/lib/serverLoad";
 import type { SectionStates } from "@/lib/loadState";
 import type { ConnectionState } from "@/components/common";
@@ -11,6 +12,7 @@ import {
   startMciRunbookAction,
   resumeRunbookAction,
   fetchCheckpointsAction,
+  seedPreArrivalDemoAction,
 } from "@/app/actions";
 
 import { SystemStatus } from "./SystemStatus";
@@ -21,6 +23,9 @@ import { ResourceOverview } from "./ResourceOverview";
 import { DeficitPanel } from "./DeficitPanel";
 import { RunbookSection } from "./RunbookSection";
 import { AuditActivityPanel } from "./AuditActivityPanel";
+
+import { HospitalCommandCenter } from "@/components/hospital/HospitalCommandCenter";
+import { AmbulanceIntake } from "@/components/ambulance/AmbulanceIntake";
 
 import type {
   DecideResponseWire,
@@ -39,6 +44,9 @@ export interface OperationsDashboardProps {
   readonly audit?: readonly AuditEvent[];
   readonly execution?: RunbookExecutionStateWire | null;
   readonly activeCheckpoint?: TrueForgeApprovalCheckpointWire | null;
+  readonly prearrivalCases?: readonly PreArrivalCase[];
+  readonly prearrivalResources?: PreArrivalResourcesOverview | null;
+  readonly defaultTab?: "HOSPITAL_COMMAND" | "AMBULANCE_DISPATCH" | "MCI_RUNBOOK";
   readonly appName?: string;
   readonly appTagline?: string;
   readonly lastRefreshed?: string;
@@ -48,13 +56,22 @@ export function OperationsDashboard({
   configured,
   sections,
   health,
+  hospital,
+  resources,
+  incidents,
+  audit,
   execution: initialExecution,
   activeCheckpoint: initialCheckpoint,
+  prearrivalCases,
+  prearrivalResources,
+  defaultTab = "HOSPITAL_COMMAND",
   appName = "AIMBULENCE",
   appTagline = "AI Emergency Hospital Operations Runbook Executor",
   lastRefreshed,
 }: OperationsDashboardProps) {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"HOSPITAL_COMMAND" | "AMBULANCE_DISPATCH" | "MCI_RUNBOOK">(defaultTab);
+  const [isSeedingDemo, setIsSeedingDemo] = useState(false);
   const [execution, setExecution] = useState<RunbookExecutionStateWire | null>(initialExecution ?? null);
   const [activeCheckpoint, setActiveCheckpoint] = useState<TrueForgeApprovalCheckpointWire | null>(initialCheckpoint ?? null);
   const [isInitiating, setIsInitiating] = useState(false);
@@ -97,6 +114,27 @@ export function OperationsDashboard({
     : partialFailure
     ? "DEGRADED"
     : "CONNECTED";
+
+  /**
+   * Quick action to seed the flagship 28yo male RTA scenario and switch to hospital command.
+   */
+  const handleQuickSeedDemo = async () => {
+    setIsSeedingDemo(true);
+    try {
+      const res = await seedPreArrivalDemoAction();
+      if (res.ok) {
+        setOperationFeedback(res.message || "Flagship 28yo RTA scenario seeded.");
+        setActiveTab("HOSPITAL_COMMAND");
+        router.refresh();
+      } else {
+        setOperationFeedback(res.message || "Failed to seed demo scenario.");
+      }
+    } catch (err) {
+      setOperationFeedback(err instanceof Error ? err.message : "Error seeding demo.");
+    } finally {
+      setIsSeedingDemo(false);
+    }
+  };
 
   /**
    * Controlled operator initiation of the 15-step MCI-01 runbook.
@@ -211,6 +249,75 @@ export function OperationsDashboard({
         sections={sections}
       />
 
+      {/* MODE NAVIGATION TABS */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-800 bg-stone-900/90 p-2 shadow-lg backdrop-blur">
+        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="System Mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "HOSPITAL_COMMAND"}
+            data-testid="tab-hospital-command"
+            onClick={() => setActiveTab("HOSPITAL_COMMAND")}
+            className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === "HOSPITAL_COMMAND"
+                ? "bg-rose-950/80 text-rose-200 border border-rose-500/40 shadow-sm shadow-rose-950/50"
+                : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/60"
+            }`}
+          >
+            <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+            🏥 Pre-Arrival Command Center
+            {prearrivalCases && prearrivalCases.length > 0 && (
+              <span className="rounded-full bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-mono text-rose-300">
+                {prearrivalCases.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "AMBULANCE_DISPATCH"}
+            data-testid="tab-ambulance-dispatch"
+            onClick={() => setActiveTab("AMBULANCE_DISPATCH")}
+            className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === "AMBULANCE_DISPATCH"
+                ? "bg-amber-950/80 text-amber-200 border border-amber-500/40 shadow-sm shadow-amber-950/50"
+                : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/60"
+            }`}
+          >
+            🚑 Ambulance Cockpit
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "MCI_RUNBOOK"}
+            data-testid="tab-mci-runbook"
+            onClick={() => setActiveTab("MCI_RUNBOOK")}
+            className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === "MCI_RUNBOOK"
+                ? "bg-sky-950/80 text-sky-200 border border-sky-500/40 shadow-sm shadow-sky-950/50"
+                : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/60"
+            }`}
+          >
+            📋 MCI Surge Runbook (MCI-01)
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            data-testid="seed-demo-scenario-btn"
+            disabled={isSeedingDemo}
+            onClick={handleQuickSeedDemo}
+            className="flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-950/60 px-3 py-1.5 text-xs font-semibold text-rose-200 hover:bg-rose-900/60 active:scale-95 transition-all disabled:opacity-50"
+          >
+            <span>⚡</span>
+            <span>{isSeedingDemo ? "Seeding Scenario..." : "Seed 28yo RTA Scenario"}</span>
+          </button>
+        </div>
+      </div>
+
       {operationFeedback ? (
         <div
           data-testid="operation-feedback-banner"
@@ -221,8 +328,38 @@ export function OperationsDashboard({
         </div>
       ) : null}
 
-      {/* OPERATIONAL GRID LAYOUT */}
-      <div className="grid gap-5 lg:grid-cols-12">
+      {/* VIEW 1: PRE-ARRIVAL HOSPITAL COMMAND CENTER */}
+      <div
+        className={activeTab === "HOSPITAL_COMMAND" ? "block" : "hidden"}
+        data-testid="prearrival-command-view"
+      >
+        <HospitalCommandCenter
+          initialCases={prearrivalCases ? [...prearrivalCases] : []}
+          initialResources={prearrivalResources ?? null}
+          initialAuditEvents={audit ? [...audit] : []}
+          onSwitchToAmbulanceView={() => setActiveTab("AMBULANCE_DISPATCH")}
+        />
+      </div>
+
+      {/* VIEW 2: AMBULANCE COCKPIT (EN-ROUTE INTAKE) */}
+      <div
+        className={activeTab === "AMBULANCE_DISPATCH" ? "block" : "hidden"}
+        data-testid="ambulance-intake-view"
+      >
+        <AmbulanceIntake
+          activeCase={prearrivalCases && prearrivalCases.length > 0 ? prearrivalCases[0] : null}
+          onCaseCreated={() => {
+            setActiveTab("HOSPITAL_COMMAND");
+            router.refresh();
+          }}
+        />
+      </div>
+
+      {/* VIEW 3: MCI SURGE RUNBOOK (MCI-01) */}
+      <div
+        className={activeTab === "MCI_RUNBOOK" ? "grid gap-5 lg:grid-cols-12" : "hidden"}
+        data-testid="mci-runbook-container"
+      >
         {/* Left Column (Incident, Deficits, Runbook Visualizer) - 7 cols on lg */}
         <div className="flex flex-col gap-5 lg:col-span-7">
           {/* 2. INCIDENT OVERVIEW */}

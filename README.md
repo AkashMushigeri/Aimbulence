@@ -1,37 +1,40 @@
 # AIMBULENCE 🚑
 
-> **AI Emergency Hospital Operations Runbook Executor**  
+> **AI Emergency Pre-Arrival Coordination & Operations Agent**  
 > Built for the **Agents That Act** Hackathon (TrueFoundry × Polaris / HackCulture)  
-> **Theme:** RUNBOOK EXECUTOR  
 > **Tagline:** *"Act Fast. Coordinate Smart. Keep Humans in Control."*  
 > **Repository:** [https://github.com/AkashMushigeri/Aimbulence](https://github.com/AkashMushigeri/Aimbulence)  
-> **Current Branch:** `member-1`  
-> **Test Status:** 🟢 48/48 Backend Pytest Passed | 🟢 142/142 Frontend Vitest Passed  
+> **Branch:** `main`  
+> **Test Status:** 🟢 57/57 Backend Pytest Passed | 🟢 171/171 Frontend Vitest Passed (228/228 Total Tests Passed)  
 
 ---
 
 ## Executive Overview
 
-**AIMBULENCE** is an autonomous, safety-gated AI operational runbook executor that coordinates hospital surge capacity, staff mobilization, and critical supplies during Mass Casualty Incidents (MCIs). 
+**AIMBULENCE** is an AI-powered Emergency Pre-Arrival Coordination and Hospital Surge Agent. 
 
-During catastrophic events (such as a 42-casualty multi-vehicle highway collision), hospital emergency operations centers are overwhelmed by dozens of simultaneous logistical phone calls, resource checks, and manual checklists. Static paper runbooks create deadly coordination bottlenecks.
+Its primary mission is to **eliminate the critical delay between an ambulance arriving at the hospital and treatment beginning**. In conventional emergency response, hospital teams scramble only after the ambulance pulls up to the emergency bay. AIMBULENCE intercepts en-route ambulance telemetry, parses paramedic descriptions in real time, computes hospital resource capacity, generates an explainable **Pre-Arrival Preparation Plan** with explicit clinical rationales, and alerts authorized hospital staff with human-in-the-loop authorization gates (`[APPROVE]`, `[REJECT]`, `[ACKNOWLEDGE]`).
 
-AIMBULENCE transforms static disaster response procedures into an **interactive, observable, and verifiable execution pipeline**. The agent reads real hospital operational state, autonomously performs routine operational preparations, and **strictly halts at consequential decisions** (such as commandeering active surgical suites or declaring disaster status) until an authorized human operator grants cryptographic approval.
+Additionally, AIMBULENCE preserves comprehensive disaster surge orchestration through its dedicated **MCI-01 Mass Casualty Protocol** runbook executor.
 
 ### Core Architectural Axiom
-> **"Autonomous in execution, but not autonomous in authority."**
+> **"Autonomous in preparation and telemetry analysis, strictly human-in-the-loop for clinical authorization."**
 
 ---
 
 ## Key Features
 
-- **⚡ Autonomous Fast-Track Coordination:** Automatically queries operational telemetry, calculates acute resource deficits, dispatches emergency triage checklists, and stages uncrossmatched blood reserves.
-- **🛡️ TrueForge Human-in-the-Loop Checkpoint:** High-impact, irreversible operational actions (RED tier) trigger an automated pause. The system generates an immutable proposal and requires human sign-off before mutating the database.
-- **🔐 Cryptographically Bound Single-Use Tokens:** Approvals are secured with 32-byte cryptographically bound tokens locked to the specific action ID and target resource. Replay attacks, cross-resource reuse, and forged executions are rejected.
-- **🛑 Zero-Mutation Rejection Guarantee:** If an operator rejects a proposed consequential action, the database remains 100% unmutated. Zero preemptive or speculative writes occur.
-- **💾 ACID-Compliant SQLite Persistence:** Complete runbook state, step logs, approval checkpoints, and operational resources survive server reboots and process restarts.
-- **📊 Real-Time Operator Control Center:** Next.js 14 dashboard with live telemetry meters, visual MCI-01 step progression, and interactive TrueForge approval modals.
-- **📜 Append-Only Audit Trail:** Microsecond-precision audit logging of every query, calculation, task dispatch, approval, and state verification.
+- **🚑 En-Route Telemetry & Clinical Intake:** Ingests unstructured paramedic field descriptions and structured physiological vitals (BP, HR, SpO2, GCS, RR) directly from transit ambulances.
+- **🧠 AI Fact Extraction & Clinical Classification:** Deterministically extracts symptoms, vitals anomalies, and injury mechanisms, categorizing cases (Trauma, Cardiac, Stroke, Respiratory) with priority stratification (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+- **📋 Explainable Pre-Arrival Preparation Plans:** Automatically matches incoming clinical facts against real-time hospital resource availability (beds, blood bank, trauma bays, surgical suites, specialists, diagnostic scanners). Every recommended action includes an explicit, medically grounded rationale.
+- **🛡️ Human-in-the-Loop Governance:** High-impact preparations require clinical authorization (`[APPROVE]`, `[REJECT]`, `[ACKNOWLEDGE]`). Rejections require documented medical notes.
+- **🗺️ Live Radar & GPS Telemetry:** Real-time distance and ETA countdown with touchdown detection and dynamic hospital readiness alerts.
+- **🏥 Multi-Modal Command Center:** Seamless operator tab switching between:
+  1. **🏥 Pre-Arrival Hospital Command Center:** Inbound ambulance queue, live radar, patient vitals telemetry, physiological alarms, and preparation action matrix.
+  2. **🚑 Ambulance Cockpit:** Field paramedic dispatch form, instant 28yo collision scenario loader, and telemetry simulation.
+  3. **📋 MCI Surge Runbook (MCI-01):** 15-step mass casualty response protocol with TrueForge cryptographic approval gates.
+- **⚡ 1-Click Flagship Demo Seed:** Instantly loads the flagship 28-year-old male polytrauma collision scenario (BP 90/60, HR 118, SpO2 88%, severe hemorrhage, 14 min ETA).
+- **📜 Tamper-Proof Audit Trail:** Microsecond-precision audit logging of every query, recommendation, decision, and arrival event.
 
 ---
 
