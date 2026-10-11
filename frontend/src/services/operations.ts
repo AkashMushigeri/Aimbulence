@@ -21,6 +21,12 @@ import {
   toResourceStatus,
 } from "@/lib/mappers";
 import type { AuditEvent, HospitalCapacity, Incident, ResourceStatus } from "@/types/domain";
+import type {
+  CaseCreatePayload,
+  PreArrivalAction,
+  PreArrivalCase,
+  PreArrivalResourcesOverview,
+} from "@/types/domain/prearrival";
 import { API_PATHS } from "@/types/api/contracts";
 import type {
   AuditEventWire,
@@ -62,6 +68,25 @@ export interface OperationsService {
   getRunbookExecution(executionId: string, signal?: AbortSignal): Promise<RunbookExecutionStateWire>;
   getLatestRunbook(signal?: AbortSignal): Promise<RunbookExecutionStateWire | null>;
   resumeRunbook(executionId: string, reason?: string, signal?: AbortSignal): Promise<RunbookExecutionStateWire>;
+  getPreArrivalCases(signal?: AbortSignal): Promise<PreArrivalCase[]>;
+  getPreArrivalCase(caseId: string, signal?: AbortSignal): Promise<PreArrivalCase>;
+  createPreArrivalCase(payload: CaseCreatePayload, signal?: AbortSignal): Promise<PreArrivalCase>;
+  decidePreArrivalAction(
+    caseId: string,
+    actionId: string,
+    decision: "APPROVE" | "REJECT" | "ACKNOWLEDGE",
+    authorizedBy: string,
+    reason?: string,
+    signal?: AbortSignal,
+  ): Promise<PreArrivalAction>;
+  updatePreArrivalLocation(
+    caseId: string,
+    payload: { current_location_name?: string; distance_km?: number; eta_minutes?: number },
+    signal?: AbortSignal,
+  ): Promise<PreArrivalCase>;
+  markPreArrivalArrived(caseId: string, signal?: AbortSignal): Promise<PreArrivalCase>;
+  getPreArrivalResources(signal?: AbortSignal): Promise<PreArrivalResourcesOverview>;
+  seedPreArrivalDemo(signal?: AbortSignal): Promise<PreArrivalCase>;
 }
 
 /** `docs/api_contract.md` section 2.6: default 50, maximum 200. */
@@ -196,6 +221,70 @@ export function createOperationsService(client: ApiClient): OperationsService {
         signal,
       });
       return assertObject<RunbookExecutionStateWire>(wire, path);
+    },
+
+    async getPreArrivalCases(signal) {
+      const wire = await client.request<PreArrivalCase[]>(API_PATHS.PREARRIVAL_CASES, { signal });
+      return assertArray<PreArrivalCase>(wire, API_PATHS.PREARRIVAL_CASES);
+    },
+
+    async getPreArrivalCase(caseId, signal) {
+      const path = API_PATHS.PREARRIVAL_CASE_BY_ID(encodeURIComponent(caseId));
+      const wire = await client.request<PreArrivalCase>(path, { signal });
+      return assertObject<PreArrivalCase>(wire, path);
+    },
+
+    async createPreArrivalCase(payload, signal) {
+      const path = API_PATHS.PREARRIVAL_CASES;
+      const wire = await client.request<PreArrivalCase>(path, {
+        method: "POST",
+        body: payload,
+        signal,
+      });
+      return assertObject<PreArrivalCase>(wire, path);
+    },
+
+    async decidePreArrivalAction(caseId, actionId, decision, authorizedBy, reason, signal) {
+      const path = API_PATHS.PREARRIVAL_CASE_DECISION(encodeURIComponent(caseId), encodeURIComponent(actionId));
+      const wire = await client.request<PreArrivalAction>(path, {
+        method: "POST",
+        body: { decision, authorized_by: authorizedBy, reason },
+        signal,
+      });
+      return assertObject<PreArrivalAction>(wire, path);
+    },
+
+    async updatePreArrivalLocation(caseId, payload, signal) {
+      const path = API_PATHS.PREARRIVAL_CASE_LOCATION(encodeURIComponent(caseId));
+      const wire = await client.request<PreArrivalCase>(path, {
+        method: "POST",
+        body: payload,
+        signal,
+      });
+      return assertObject<PreArrivalCase>(wire, path);
+    },
+
+    async markPreArrivalArrived(caseId, signal) {
+      const path = API_PATHS.PREARRIVAL_CASE_ARRIVE(encodeURIComponent(caseId));
+      const wire = await client.request<PreArrivalCase>(path, {
+        method: "POST",
+        signal,
+      });
+      return assertObject<PreArrivalCase>(wire, path);
+    },
+
+    async getPreArrivalResources(signal) {
+      const wire = await client.request<PreArrivalResourcesOverview>(API_PATHS.PREARRIVAL_RESOURCES, { signal });
+      return assertObject<PreArrivalResourcesOverview>(wire, API_PATHS.PREARRIVAL_RESOURCES);
+    },
+
+    async seedPreArrivalDemo(signal) {
+      const path = API_PATHS.PREARRIVAL_DEMO_SEED;
+      const wire = await client.request<PreArrivalCase>(path, {
+        method: "POST",
+        signal,
+      });
+      return assertObject<PreArrivalCase>(wire, path);
     },
   };
 }
