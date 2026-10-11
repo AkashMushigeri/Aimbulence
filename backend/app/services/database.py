@@ -9,6 +9,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -183,6 +184,69 @@ class RunbookStepExecutionRecord(Base):
     started_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     completed_at = Column(DateTime, nullable=True)
 
+
+class PreArrivalCaseRecord(Base):
+    """En-route emergency patient pre-arrival coordination case."""
+    __tablename__ = "prearrival_cases"
+
+    id = Column(String(36), primary_key=True, default=lambda: f"CASE-{uuid.uuid4().hex[:8].upper()}")
+    ambulance_id = Column(String(20), nullable=False, default="AMB-102")
+    patient_name = Column(String(100), nullable=True)
+    patient_age = Column(Integer, nullable=True)
+    patient_gender = Column(String(20), nullable=True)
+    symptoms_json = Column(Text, nullable=False, default="[]")
+    vital_bp = Column(String(20), nullable=True)
+    vital_hr = Column(Integer, nullable=True)
+    vital_spo2 = Column(Integer, nullable=True)
+    vital_temp = Column(String(20), nullable=True)
+    vital_rr = Column(Integer, nullable=True)
+    allergies = Column(String(255), nullable=True)
+    medical_conditions = Column(String(255), nullable=True)
+    current_medications = Column(String(255), nullable=True)
+    incident_type = Column(String(100), nullable=True)
+    consciousness = Column(String(50), nullable=True)
+    blood_group = Column(String(10), nullable=True, default="Unknown")
+    oxygen_required = Column(Boolean, nullable=False, default=False)
+    pain_level = Column(String(50), nullable=True)
+    raw_description = Column(Text, nullable=True)
+    extracted_data_json = Column(Text, nullable=False, default="{}")
+    emergency_category = Column(String(100), nullable=False, default="GENERAL_EMERGENCY")
+    priority = Column(String(20), nullable=False, default="HIGH")  # CRITICAL, HIGH, MEDIUM, LOW
+    clinical_summary = Column(Text, nullable=True)
+    current_location_name = Column(String(200), nullable=False, default="Tumakuru Road")
+    destination_hospital = Column(String(100), nullable=False, default="Metro Central Trauma Hospital")
+    distance_km = Column(Float, nullable=False, default=8.4)
+    eta_minutes = Column(Integer, nullable=False, default=14)
+    latitude = Column(Float, nullable=True, default=13.0489)
+    longitude = Column(Float, nullable=True, default=77.5147)
+    status = Column(String(30), nullable=False, default="EN_ROUTE")  # EN_ROUTE, PREPARING, ARRIVED, CANCELLED
+    immediate_actions_json = Column(Text, nullable=False, default="[]")
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    arrived_at = Column(DateTime, nullable=True)
+
+    actions = relationship("PreArrivalActionRecord", back_populates="case", cascade="all, delete-orphan", order_by="PreArrivalActionRecord.id")
+
+
+class PreArrivalActionRecord(Base):
+    """Specific preparation recommendation and authorized human decision for an emergency case."""
+    __tablename__ = "prearrival_actions"
+
+    id = Column(String(36), primary_key=True, default=lambda: f"ACT-{uuid.uuid4().hex[:8].upper()}")
+    case_id = Column(String(36), ForeignKey("prearrival_cases.id"), nullable=False, index=True)
+    resource_category = Column(String(50), nullable=False)  # BED, SPECIALIST, BLOOD_BANK, MEDICATION, IMAGING, OPERATION_THEATRE
+    resource_name = Column(String(100), nullable=False)
+    recommended_status = Column(String(50), nullable=False)  # PREPARE, RESERVE, NOTIFY, ALERT, STANDBY
+    reason = Column(Text, nullable=False)
+    hospital_availability = Column(String(30), nullable=False, default="AVAILABLE")  # AVAILABLE, LIMITED, UNAVAILABLE, PREPARING, RESERVED
+    decision_type = Column(String(30), nullable=False, default="PENDING")  # PENDING, APPROVED, REJECTED, ACKNOWLEDGED
+    decision_by = Column(String(100), nullable=True)
+    decision_reason = Column(String(255), nullable=True)
+    decision_timestamp = Column(DateTime, nullable=True)
+    requires_approval = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    case = relationship("PreArrivalCaseRecord", back_populates="actions")
 
 
 # ==============================================================================
@@ -418,7 +482,9 @@ def reset_demo_database(db: Session):
     DEMO-ONLY: Clears execution records, active incidents, and tasks, restoring
     synthetic hospital capacity and resource allocations to deterministic state.
     """
-    # 1. Clear runbook executions, tasks, incidents, and audit
+    # 1. Clear runbook executions, tasks, incidents, prearrival cases, and audit
+    db.query(PreArrivalActionRecord).delete()
+    db.query(PreArrivalCaseRecord).delete()
     db.query(RunbookStepExecutionRecord).delete()
     db.query(RunbookExecutionRecord).delete()
     db.query(OperationalTaskRecord).delete()

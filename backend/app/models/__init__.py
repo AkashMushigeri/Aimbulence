@@ -32,6 +32,19 @@ from backend.app.models.actions import (
     ActionResponse,
     AuditEvent,
 )
+from backend.app.models.prearrival import (
+    EmergencyPriority,
+    PreArrivalStatus,
+    ResourceCategory,
+    HospitalAvailability,
+    ActionDecision,
+    VitalsSchema,
+    PreArrivalCaseCreate,
+    PreArrivalActionResponse,
+    PreArrivalCaseResponse,
+    ActionDecisionRequest,
+    LocationUpdateRequest,
+)
 
 __all__ = [
     "IncidentSeverity",
@@ -59,4 +72,15 @@ __all__ = [
     "ActionProposal",
     "ActionResponse",
     "AuditEvent",
+    "EmergencyPriority",
+    "PreArrivalStatus",
+    "ResourceCategory",
+    "HospitalAvailability",
+    "ActionDecision",
+    "VitalsSchema",
+    "PreArrivalCaseCreate",
+    "PreArrivalActionResponse",
+    "PreArrivalCaseResponse",
+    "ActionDecisionRequest",
+    "LocationUpdateRequest",
 ]
