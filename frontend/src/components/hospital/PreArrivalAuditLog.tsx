@@ -7,6 +7,26 @@ interface PreArrivalAuditLogProps {
   initialEvents?: AuditEvent[];
 }
 
+function formatAuditTime(iso: string): string {
+  if (!iso) return "—";
+  const tIndex = iso.indexOf("T");
+  if (tIndex !== -1) {
+    const rawTime = iso.slice(tIndex + 1, tIndex + 9);
+    if (rawTime.length === 8) {
+      return `${rawTime} UTC`;
+    }
+  }
+  const parsed = Date.parse(iso);
+  if (!Number.isNaN(parsed)) {
+    const d = new Date(parsed);
+    const h = String(d.getUTCHours()).padStart(2, "0");
+    const m = String(d.getUTCMinutes()).padStart(2, "0");
+    const s = String(d.getUTCSeconds()).padStart(2, "0");
+    return `${h}:${m}:${s} UTC`;
+  }
+  return iso;
+}
+
 export function PreArrivalAuditLog({ initialEvents = [] }: PreArrivalAuditLogProps) {
   const [events, setEvents] = useState<AuditEvent[]>(initialEvents);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -53,8 +73,11 @@ export function PreArrivalAuditLog({ initialEvents = [] }: PreArrivalAuditLogPro
                     <span className="font-bold text-stone-900">{ev.eventType}</span>
                   </div>
 
-                  <span className="text-[10px] text-stone-400">
-                    {new Date(ev.timestamp).toLocaleTimeString()}
+                  <span
+                    suppressHydrationWarning
+                    className="text-[10px] text-stone-400"
+                  >
+                    {formatAuditTime(ev.timestamp)}
                   </span>
                 </div>
 
