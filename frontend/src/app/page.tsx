@@ -36,6 +36,8 @@ export default async function OperatorConsolePage() {
         audit={data.audit}
         execution={data.execution}
         activeCheckpoint={data.activeCheckpoint}
+        prearrivalCases={data.prearrivalCases}
+        prearrivalResources={data.prearrivalResources}
         appName={appName}
         appTagline={appTagline}
         lastRefreshed={data.health ? new Date().toISOString() : undefined}

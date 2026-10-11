@@ -202,3 +202,131 @@ export async function fetchCheckpointsAction(stateFilter?: string) {
     };
   }
 }
+
+/**
+ * Server action to create a new en-route ambulance pre-arrival case.
+ */
+export async function createPreArrivalCaseAction(payload: import("@/types/domain/prearrival").CaseCreatePayload) {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const created = await prearrivalService.createCase(payload);
+    revalidatePath("/");
+    return { ok: true, case: created, message: `Emergency case ${created.id} initialized for ambulance ${created.ambulance_id}.` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to create pre-arrival emergency case.",
+    };
+  }
+}
+
+/**
+ * Server action for authorized hospital human-in-the-loop decision (APPROVE / REJECT / ACKNOWLEDGE).
+ */
+export async function decidePreArrivalActionAction(
+  caseId: string,
+  actionId: string,
+  decision: "APPROVE" | "REJECT" | "ACKNOWLEDGE",
+  authorizedBy: string,
+  reason?: string,
+) {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const updated = await prearrivalService.decideAction(caseId, actionId, decision, authorizedBy, reason);
+    revalidatePath("/");
+    return { ok: true, action: updated, message: `Action ${actionId} marked ${decision} by ${authorizedBy}.` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to record action decision.",
+    };
+  }
+}
+
+/**
+ * Server action to update ambulance GPS location / ETA countdown.
+ */
+export async function updatePreArrivalLocationAction(
+  caseId: string,
+  payload: { current_location_name?: string; distance_km?: number; eta_minutes?: number },
+) {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const updated = await prearrivalService.updateLocation(caseId, payload);
+    revalidatePath("/");
+    return { ok: true, case: updated };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to update ambulance telemetry.",
+    };
+  }
+}
+
+/**
+ * Server action to mark an ambulance as arrived at the hospital.
+ */
+export async function markPreArrivalArrivedAction(caseId: string) {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const updated = await prearrivalService.markArrived(caseId);
+    revalidatePath("/");
+    return { ok: true, case: updated, message: `Ambulance ${updated.ambulance_id} arrived at trauma bay.` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to record ambulance arrival.",
+    };
+  }
+}
+
+/**
+ * Server action to seed the flagship 28yo male RTA scenario.
+ */
+export async function seedPreArrivalDemoAction() {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const seeded = await prearrivalService.seedDemo();
+    revalidatePath("/");
+    return { ok: true, case: seeded, message: "Flagship 28yo male collision demo case seeded successfully." };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to seed demo case.",
+    };
+  }
+}
+
+/**
+ * Server action to fetch active pre-arrival emergency cases.
+ */
+export async function fetchPreArrivalCasesAction() {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const cases = await prearrivalService.listCases();
+    return { ok: true, cases };
+  } catch (error) {
+    return {
+      ok: false,
+      cases: [],
+      message: error instanceof Error ? error.message : "Failed to fetch pre-arrival cases.",
+    };
+  }
+}
+
+/**
+ * Server action to fetch real-time hospital resource matrix.
+ */
+export async function fetchPreArrivalResourcesAction() {
+  try {
+    const { prearrivalService } = await import("@/services/prearrivalService");
+    const resources = await prearrivalService.getResources();
+    return { ok: true, resources };
+  } catch (error) {
+    return {
+      ok: false,
+      resources: null,
+      message: error instanceof Error ? error.message : "Failed to fetch hospital resources.",
+    };
+  }
+}
